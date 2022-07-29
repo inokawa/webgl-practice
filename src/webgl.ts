@@ -11,7 +11,7 @@ type Vao = {
   vao: WebGLVertexArrayObject;
   // vertices: WebGLBuffer;
   // indices: IndexBuffer;
-  use: (fn: (count: number) => void) => void;
+  use: (fn: (count?: number) => void) => void;
   dispose: () => void;
 };
 
@@ -88,7 +88,7 @@ export const createVertexArray = (
   gl: WebGL2RenderingContext,
   program: Program,
   vertices: number[],
-  indices: number[]
+  indices?: number[]
 ): Vao => {
   const vao = gl.createVertexArray()!;
   gl.bindVertexArray(vao);
@@ -107,25 +107,29 @@ export const createVertexArray = (
   );
   gl.enableVertexAttribArray(program.attributes.aVertexPosition);
 
-  const indexBuffer = gl.createBuffer()!;
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
-  gl.bufferData(
-    gl.ELEMENT_ARRAY_BUFFER,
-    new Uint16Array(indices),
-    gl.STATIC_DRAW
-  );
+  let indexBuffer: WebGLBuffer | null = null;
+  if (indices) {
+    indexBuffer = gl.createBuffer()!;
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+    gl.bufferData(
+      gl.ELEMENT_ARRAY_BUFFER,
+      new Uint16Array(indices),
+      gl.STATIC_DRAW
+    );
+  }
 
   gl.bindVertexArray(null);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-
+  if (indices) {
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+  }
   const self: Vao = {
     vao: vao,
     // vertices: vertexBuffer,
     // indices: { data: indexBuffer, count: indices.length },
     use: (fn) => {
       gl.bindVertexArray(self.vao);
-      fn(indices.length);
+      fn(indices ? indices.length : undefined);
       gl.bindVertexArray(null);
     },
     dispose: () => {
@@ -152,6 +156,10 @@ export const draw = (
   beforeDraw();
 
   vao.use((count) => {
-    gl.drawElements(gl[mode], count, gl.UNSIGNED_SHORT, 0);
+    if (count != null) {
+      gl.drawElements(gl[mode], count, gl.UNSIGNED_SHORT, 0);
+    } else {
+      gl.drawArrays(gl[mode], gl.UNSIGNED_SHORT, 0);
+    }
   });
 };
