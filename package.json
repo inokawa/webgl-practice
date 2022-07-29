@@ -4,13 +4,15 @@
   "private": true,
   "scripts": {
     "start": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "vite build",
+    "preview": "vite preview",
+    "tsc": "tsc -p . --noEmit"
   },
   "devDependencies": {
     "typescript": "^4.7.4",
     "vite": "^3.0.3"
   },
+  "author": "inokawa",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/inokawa/webgl-3d-practice.git"
