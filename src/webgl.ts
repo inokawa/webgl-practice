@@ -9,20 +9,21 @@ export type RenderingMode =
 
 type Vao = {
   vao: WebGLVertexArrayObject;
-  vertices: WebGLBuffer;
-  indices: IndexBuffer;
+  // vertices: WebGLBuffer;
+  // indices: IndexBuffer;
   use: (fn: (count: number) => void) => void;
   dispose: () => void;
 };
 
-type IndexBuffer = {
-  data: WebGLBuffer;
-  count: number;
-};
+// type IndexBuffer = {
+//   data: WebGLBuffer;
+//   count: number;
+// };
 
-type Program = {
+type Program<A extends string = string, U extends string = string> = {
   data: WebGLProgram;
-  aVertexPosition: number;
+  uniforms: { [key in U]: WebGLUniformLocation };
+  attributes: { [key in A]: number };
   use: () => void;
   dispose: () => void;
 };
@@ -45,11 +46,13 @@ const createShader = (
   return shader;
 };
 
-export const initProgram = (
+export const initProgram = <A extends string, U extends string>(
   gl: WebGL2RenderingContext,
   vert: string,
-  frag: string
-): Program => {
+  frag: string,
+  attributes: A[],
+  uniforms: U[]
+): Program<A, U> => {
   const program = gl.createProgram()!;
   const vertShader = createShader(gl, vert, "VERTEX_SHADER")!;
   const fragShader = createShader(gl, frag, "FRAGMENT_SHADER")!;
@@ -64,7 +67,14 @@ export const initProgram = (
 
   return {
     data: program,
-    aVertexPosition: gl.getAttribLocation(program, "aVertexPosition"),
+    attributes: attributes.reduce((acc, k) => {
+      acc[k] = gl.getAttribLocation(program, k);
+      return acc;
+    }, {} as { [key in A]: number }),
+    uniforms: uniforms.reduce((acc, k) => {
+      acc[k] = gl.getUniformLocation(program, k)!;
+      return acc;
+    }, {} as { [key in U]: WebGLUniformLocation }),
     use: () => {
       gl.useProgram(program);
     },
@@ -74,7 +84,7 @@ export const initProgram = (
   };
 };
 
-export const initBuffers = (
+export const createVertexArray = (
   gl: WebGL2RenderingContext,
   program: Program,
   vertices: number[],
@@ -87,8 +97,15 @@ export const initBuffers = (
   gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-  gl.vertexAttribPointer(program.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(program.aVertexPosition);
+  gl.vertexAttribPointer(
+    program.attributes.aVertexPosition,
+    3,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+  gl.enableVertexAttribArray(program.attributes.aVertexPosition);
 
   const indexBuffer = gl.createBuffer()!;
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
@@ -104,17 +121,17 @@ export const initBuffers = (
 
   const self: Vao = {
     vao: vao,
-    vertices: vertexBuffer,
-    indices: { data: indexBuffer, count: indices.length },
+    // vertices: vertexBuffer,
+    // indices: { data: indexBuffer, count: indices.length },
     use: (fn) => {
       gl.bindVertexArray(self.vao);
-      fn(self.indices.count);
+      fn(indices.length);
       gl.bindVertexArray(null);
     },
     dispose: () => {
       gl.deleteVertexArray(self.vao);
-      gl.deleteBuffer(self.vertices);
-      gl.deleteBuffer(self.indices.data);
+      gl.deleteBuffer(vertexBuffer);
+      gl.deleteBuffer(indexBuffer);
     },
   };
   return self;
@@ -124,90 +141,17 @@ export const draw = (
   gl: WebGL2RenderingContext,
   program: Program,
   vao: Vao,
-  renderingMode: RenderingMode
+  mode: RenderingMode,
+  beforeDraw: () => void
 ) => {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
   program.use();
 
-  vao.use(() => {
-    switch (renderingMode) {
-      case "TRIANGLES": {
-        const indices = [0, 1, 2, 2, 3, 4];
-        gl.bufferData(
-          gl.ELEMENT_ARRAY_BUFFER,
-          new Uint16Array(indices),
-          gl.STATIC_DRAW
-        );
-        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
-        break;
-      }
-      case "LINES": {
-        const indices = [1, 3, 0, 4, 1, 2, 2, 3];
-        gl.bufferData(
-          gl.ELEMENT_ARRAY_BUFFER,
-          new Uint16Array(indices),
-          gl.STATIC_DRAW
-        );
-        gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
-        break;
-      }
-      case "POINTS": {
-        const indices = [1, 2, 3];
-        gl.bufferData(
-          gl.ELEMENT_ARRAY_BUFFER,
-          new Uint16Array(indices),
-          gl.STATIC_DRAW
-        );
-        gl.drawElements(gl.POINTS, indices.length, gl.UNSIGNED_SHORT, 0);
-        break;
-      }
-      case "LINE_LOOP": {
-        const indices = [2, 3, 4, 1, 0];
-        gl.bufferData(
-          gl.ELEMENT_ARRAY_BUFFER,
-          new Uint16Array(indices),
-          gl.STATIC_DRAW
-        );
-        gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
-        break;
-      }
-      case "LINE_STRIP": {
-        const indices = [2, 3, 4, 1, 0];
-        gl.bufferData(
-          gl.ELEMENT_ARRAY_BUFFER,
-          new Uint16Array(indices),
-          gl.STATIC_DRAW
-        );
-        gl.drawElements(gl.LINE_STRIP, indices.length, gl.UNSIGNED_SHORT, 0);
-        break;
-      }
-      case "TRIANGLE_STRIP": {
-        const indices = [0, 1, 2, 3, 4];
-        gl.bufferData(
-          gl.ELEMENT_ARRAY_BUFFER,
-          new Uint16Array(indices),
-          gl.STATIC_DRAW
-        );
-        gl.drawElements(
-          gl.TRIANGLE_STRIP,
-          indices.length,
-          gl.UNSIGNED_SHORT,
-          0
-        );
-        break;
-      }
-      case "TRIANGLE_FAN": {
-        const indices = [0, 1, 2, 3, 4];
-        gl.bufferData(
-          gl.ELEMENT_ARRAY_BUFFER,
-          new Uint16Array(indices),
-          gl.STATIC_DRAW
-        );
-        gl.drawElements(gl.TRIANGLE_FAN, indices.length, gl.UNSIGNED_SHORT, 0);
-        break;
-      }
-    }
+  beforeDraw();
+
+  vao.use((count) => {
+    gl.drawElements(gl[mode], count, gl.UNSIGNED_SHORT, 0);
   });
 };
