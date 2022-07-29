@@ -18,13 +18,13 @@ const init = async (gl: WebGL2RenderingContext, vert: string, frag: string) => {
   );
 
   const models = await Promise.all(
-    utils.range(1, 179).map((i) =>
-      fetch(`/models/nissan-gtr/part${i}.json`)
-        .then((r) => r.json())
-        .then((model) =>
+    utils
+      .range(1, 179)
+      .map((i) =>
+        import(`./models/nissan-gtr/part${i}.json`).then((model) =>
           createVertexArray(gl, program, model.vertices, model.indices)
         )
-    )
+      )
   );
 
   const projectionMatrix = mat4.create();
@@ -97,6 +97,7 @@ window.onload = () => {
   if (!canvas) return;
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
+  utils.autoResizeCanvas(canvas);
 
   const gl = utils.getGLContext(canvas);
   if (!gl) return;
