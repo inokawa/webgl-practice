@@ -2,6 +2,14 @@ import * as dat from "dat.gui";
 
 // A set of utility functions for /common operations across our application
 
+export const range = (start: number, end?: number): number[] => {
+  if (end == null) {
+    return Array.from({ length: start }, (_, i) => i);
+  }
+  const length = end - start;
+  return Array.from({ length: length }, (_, i) => i + start);
+};
+
 // Find and return a DOM element given an ID
 export const getCanvas = (id: string): HTMLCanvasElement | null => {
   const canvas = document.getElementById(id);

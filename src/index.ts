@@ -17,8 +17,15 @@ const init = async (gl: WebGL2RenderingContext, vert: string, frag: string) => {
     ["uProjectionMatrix", "uModelViewMatrix", "uModelColor"]
   );
 
-  const model = await fetch("/models/cone1.json").then((r) => r.json());
-  const vao = createVertexArray(gl, program, model.vertices, model.indices);
+  const models = await Promise.all(
+    utils.range(1, 179).map((i) =>
+      fetch(`/models/nissan-gtr/part${i}.json`)
+        .then((r) => r.json())
+        .then((model) =>
+          createVertexArray(gl, program, model.vertices, model.indices)
+        )
+    )
+  );
 
   const projectionMatrix = mat4.create();
   const modelViewMatrix = mat4.create();
@@ -26,28 +33,45 @@ const init = async (gl: WebGL2RenderingContext, vert: string, frag: string) => {
   (function render() {
     requestAnimationFrame(render);
 
-    draw(gl, program, vao, "LINE_LOOP", () => {
-      mat4.perspective(
-        projectionMatrix,
-        45,
-        gl.canvas.width / gl.canvas.height,
-        0.1,
-        10000
-      );
-      mat4.identity(modelViewMatrix);
-      mat4.translate(modelViewMatrix, modelViewMatrix, [0, 0, -5.0]);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
-      gl.uniform3fv(program.uniforms.uModelColor, model.color);
-      gl.uniformMatrix4fv(
-        program.uniforms.uProjectionMatrix,
-        false,
-        projectionMatrix
-      );
-      gl.uniformMatrix4fv(
-        program.uniforms.uModelViewMatrix,
-        false,
-        modelViewMatrix
-      );
+    program.use();
+
+    mat4.perspective(
+      projectionMatrix,
+      45,
+      gl.canvas.width / gl.canvas.height,
+      10,
+      10000
+    );
+    mat4.identity(modelViewMatrix);
+    mat4.translate(modelViewMatrix, modelViewMatrix, [-10, 0, -100]);
+    mat4.rotate(
+      modelViewMatrix,
+      modelViewMatrix,
+      (30 * Math.PI) / 180,
+      [1, 0, 0]
+    );
+    mat4.rotate(
+      modelViewMatrix,
+      modelViewMatrix,
+      (30 * Math.PI) / 180,
+      [0, 1, 0]
+    );
+    gl.uniformMatrix4fv(
+      program.uniforms.uProjectionMatrix,
+      false,
+      projectionMatrix
+    );
+    gl.uniformMatrix4fv(
+      program.uniforms.uModelViewMatrix,
+      false,
+      modelViewMatrix
+    );
+
+    models.forEach((vao) => {
+      draw(gl, vao, "LINE_LOOP");
     });
   })();
 

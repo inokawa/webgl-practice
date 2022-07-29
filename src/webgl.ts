@@ -143,18 +143,9 @@ export const createVertexArray = (
 
 export const draw = (
   gl: WebGL2RenderingContext,
-  program: Program,
   vao: Vao,
-  mode: RenderingMode,
-  beforeDraw: () => void
+  mode: RenderingMode
 ) => {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-  gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-  program.use();
-
-  beforeDraw();
-
   vao.use((count) => {
     if (count != null) {
       gl.drawElements(gl[mode], count, gl.UNSIGNED_SHORT, 0);
