@@ -1,8 +1,6 @@
 import { draw, initBuffers, initProgram, RenderingMode } from "./webgl";
 import * as utils from "./utils";
-// @ts-expect-error
 import vert from "./default.vert?raw";
-// @ts-expect-error
 import frag from "./default.frag?raw";
 
 const init = (gl: WebGL2RenderingContext, vert: string, frag: string) => {
