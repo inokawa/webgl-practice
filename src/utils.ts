@@ -1,3 +1,5 @@
+import * as dat from "dat.gui";
+
 // A set of utility functions for /common operations across our application
 
 // Find and return a DOM element given an ID
@@ -141,63 +143,76 @@ export const autoResizeCanvas = (canvas: HTMLCanvasElement) => {
 //   return ns;
 // };
 
-// // A simpler API on top of the dat.GUI API, specifically
-// // designed for this book for a simpler codebase
-// export const configureControls = (settings, options = { width: 300 }) => {
-//   // Check if a gui instance is passed in or create one by default
-//   const gui = options.gui || new dat.GUI(options);
-//   const state = {};
+// A simpler API on top of the dat.GUI API, specifically
+// designed for this book for a simpler codebase
 
-//   const isAction = (v) => typeof v === "function";
+type DatGuiSetting = {
+  value?: number | string;
+  min?: number;
+  max?: number;
+  step?: number;
+  options?: any;
+  onChange?: (v: any, state: any) => void;
+};
 
-//   const isFolder = (v) =>
-//     !isAction(v) &&
-//     typeof v === "object" &&
-//     (v.value === null || v.value === undefined);
+export const configureControls = (
+  settings: Record<string, DatGuiSetting>,
+  options: { gui?: dat.GUI; width?: number } = { width: 300 }
+) => {
+  // Check if a gui instance is passed in or create one by default
+  const gui = new dat.GUI(options);
+  const state: Record<string, any> = {};
 
-//   const isColor = (v) =>
-//     (typeof v === "string" && ~v.indexOf("#")) ||
-//     (Array.isArray(v) && v.length >= 3);
+  const isAction = (v: any): v is Function => typeof v === "function";
 
-//   Object.keys(settings).forEach((key) => {
-//     const settingValue = settings[key];
+  const isFolder = (v: any): v is Record<string, DatGuiSetting> =>
+    !isAction(v) &&
+    typeof v === "object" &&
+    (v.value === null || v.value === undefined);
 
-//     if (isAction(settingValue)) {
-//       state[key] = settingValue;
-//       return gui.add(state, key);
-//     }
-//     if (isFolder(settingValue)) {
-//       // If it's a folder, recursively call with folder as root settings element
-//       return utils.configureControls(settingValue, { gui: gui.addFolder(key) });
-//     }
+  const isColor = (v: any) =>
+    (typeof v === "string" && ~v.indexOf("#")) ||
+    (Array.isArray(v) && v.length >= 3);
 
-//     const {
-//       value,
-//       min,
-//       max,
-//       step,
-//       options,
-//       onChange = () => null,
-//     } = settingValue;
+  Object.keys(settings).forEach((key) => {
+    const settingValue = settings[key];
 
-//     // set state
-//     state[key] = value;
+    if (isAction(settingValue)) {
+      state[key] = settingValue;
+      return gui.add(state, key);
+    }
+    if (isFolder(settingValue)) {
+      // If it's a folder, recursively call with folder as root settings element
+      return configureControls(settingValue, { gui: gui.addFolder(key) });
+    }
 
-//     let controller;
+    const {
+      value,
+      min,
+      max,
+      step,
+      options,
+      onChange = () => null,
+    } = settingValue;
 
-//     // There are many other values we can set on top of the dat.GUI
-//     // API, but we'll only need a few for our purposes
-//     if (options) {
-//       controller = gui.add(state, key, options);
-//     } else if (isColor(value)) {
-//       controller = gui.addColor(state, key);
-//     } else {
-//       controller = gui.add(state, key, min, max, step);
-//     }
+    // set state
+    state[key] = value;
 
-//     controller.onChange((v) => onChange(v, state));
-//   });
-// };
+    let controller;
+
+    // There are many other values we can set on top of the dat.GUI
+    // API, but we'll only need a few for our purposes
+    if (options) {
+      controller = gui.add(state, key, options);
+    } else if (isColor(value)) {
+      controller = gui.addColor(state, key);
+    } else {
+      controller = gui.add(state, key, min, max, step);
+    }
+
+    controller.onChange((v) => onChange(v, state));
+  });
+};
 
 // // Calculate tangets for a given set of vertices
 // export const calculateTangents = (vs, tc, ind) => {

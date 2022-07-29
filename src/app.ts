@@ -1,8 +1,13 @@
+import * as utils from "./utils";
+
+let renderingMode = "TRIANGLES";
+
 type Vao = {
   vao: WebGLVertexArrayObject;
   vertices: WebGLBuffer;
   indices: IndexBuffer;
   use: (fn: (count: number) => void) => void;
+  dispose: () => void;
 };
 
 type IndexBuffer = {
@@ -14,6 +19,7 @@ type Program = {
   data: WebGLProgram;
   aVertexPosition: number;
   use: () => void;
+  dispose: () => void;
 };
 
 const createShader = (
@@ -57,6 +63,9 @@ const initProgram = (
     use: () => {
       gl.useProgram(program);
     },
+    dispose: () => {
+      gl.deleteProgram(program);
+    },
   };
 };
 
@@ -97,6 +106,11 @@ const initBuffers = (
       fn(self.indices.count);
       gl.bindVertexArray(null);
     },
+    dispose: () => {
+      gl.deleteVertexArray(self.vao);
+      gl.deleteBuffer(self.vertices);
+      gl.deleteBuffer(self.indices.data);
+    },
   };
   return self;
 };
@@ -107,8 +121,84 @@ const draw = (gl: WebGL2RenderingContext, program: Program, vao: Vao) => {
 
   program.use();
 
-  vao.use((count) => {
-    gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, 0);
+  vao.use(() => {
+    switch (renderingMode) {
+      case "TRIANGLES": {
+        const indices = [0, 1, 2, 2, 3, 4];
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+        break;
+      }
+      case "LINES": {
+        const indices = [1, 3, 0, 4, 1, 2, 2, 3];
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.drawElements(gl.LINES, indices.length, gl.UNSIGNED_SHORT, 0);
+        break;
+      }
+      case "POINTS": {
+        const indices = [1, 2, 3];
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.drawElements(gl.POINTS, indices.length, gl.UNSIGNED_SHORT, 0);
+        break;
+      }
+      case "LINE_LOOP": {
+        const indices = [2, 3, 4, 1, 0];
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.drawElements(gl.LINE_LOOP, indices.length, gl.UNSIGNED_SHORT, 0);
+        break;
+      }
+      case "LINE_STRIP": {
+        const indices = [2, 3, 4, 1, 0];
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.drawElements(gl.LINE_STRIP, indices.length, gl.UNSIGNED_SHORT, 0);
+        break;
+      }
+      case "TRIANGLE_STRIP": {
+        const indices = [0, 1, 2, 3, 4];
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.drawElements(
+          gl.TRIANGLE_STRIP,
+          indices.length,
+          gl.UNSIGNED_SHORT,
+          0
+        );
+        break;
+      }
+      case "TRIANGLE_FAN": {
+        const indices = [0, 1, 2, 3, 4];
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.drawElements(gl.TRIANGLE_FAN, indices.length, gl.UNSIGNED_SHORT, 0);
+        break;
+      }
+    }
   });
 };
 
@@ -120,23 +210,30 @@ export const init = (
   gl.clearColor(0, 0, 0, 1);
   const program = initProgram(gl, vert, frag);
 
-  /*
-        V0                    V3
-        (-0.5, 0.5, 0)        (0.5, 0.5, 0)
-        X---------------------X
-        |                     |
-        |                     |
-        |       (0, 0)        |
-        |                     |
-        |                     |
-        X---------------------X
-        V1                    V2
-        (-0.5, -0.5, 0)       (0.5, -0.5, 0)
-      */
-  const vertices = [-0.5, 0.5, 0, -0.5, -0.5, 0, 0.5, -0.5, 0, 0.5, 0.5, 0];
-  // Indices defined in counter-clockwise order
-  const indices = [0, 1, 2, 0, 2, 3];
+  const vertices = [
+    -0.5, -0.5, 0, -0.25, 0.5, 0, 0.0, -0.5, 0, 0.25, 0.5, 0, 0.5, -0.5, 0,
+  ];
+  const indices = [0, 1, 2, 0, 2, 3, 2, 3, 4];
   const vao = initBuffers(gl, program, vertices, indices);
 
-  draw(gl, program, vao);
+  (function render() {
+    requestAnimationFrame(render);
+    draw(gl, program, vao);
+  })();
+
+  utils.configureControls({
+    "Rendering Mode": {
+      value: renderingMode,
+      options: [
+        "TRIANGLES",
+        "LINES",
+        "POINTS",
+        "LINE_LOOP",
+        "LINE_STRIP",
+        "TRIANGLE_STRIP",
+        "TRIANGLE_FAN",
+      ],
+      onChange: (v) => (renderingMode = v),
+    },
+  });
 };

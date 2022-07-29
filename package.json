@@ -9,6 +9,8 @@
     "tsc": "tsc -p . --noEmit"
   },
   "devDependencies": {
+    "@types/dat.gui": "^0.7.7",
+    "dat.gui": "^0.7.9",
     "typescript": "^4.7.4",
     "vite": "^3.0.3"
   },
