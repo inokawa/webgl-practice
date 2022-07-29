@@ -1,6 +1,11 @@
-import * as utils from "./utils";
-
-let renderingMode = "TRIANGLES";
+export type RenderingMode =
+  | "TRIANGLES"
+  | "LINES"
+  | "POINTS"
+  | "LINE_LOOP"
+  | "LINE_STRIP"
+  | "TRIANGLE_STRIP"
+  | "TRIANGLE_FAN";
 
 type Vao = {
   vao: WebGLVertexArrayObject;
@@ -40,7 +45,7 @@ const createShader = (
   return shader;
 };
 
-const initProgram = (
+export const initProgram = (
   gl: WebGL2RenderingContext,
   vert: string,
   frag: string
@@ -69,7 +74,7 @@ const initProgram = (
   };
 };
 
-const initBuffers = (
+export const initBuffers = (
   gl: WebGL2RenderingContext,
   program: Program,
   vertices: number[],
@@ -115,7 +120,12 @@ const initBuffers = (
   return self;
 };
 
-const draw = (gl: WebGL2RenderingContext, program: Program, vao: Vao) => {
+export const draw = (
+  gl: WebGL2RenderingContext,
+  program: Program,
+  vao: Vao,
+  renderingMode: RenderingMode
+) => {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
@@ -199,41 +209,5 @@ const draw = (gl: WebGL2RenderingContext, program: Program, vao: Vao) => {
         break;
       }
     }
-  });
-};
-
-export const init = (
-  gl: WebGL2RenderingContext,
-  vert: string,
-  frag: string
-) => {
-  gl.clearColor(0, 0, 0, 1);
-  const program = initProgram(gl, vert, frag);
-
-  const vertices = [
-    -0.5, -0.5, 0, -0.25, 0.5, 0, 0.0, -0.5, 0, 0.25, 0.5, 0, 0.5, -0.5, 0,
-  ];
-  const indices = [0, 1, 2, 0, 2, 3, 2, 3, 4];
-  const vao = initBuffers(gl, program, vertices, indices);
-
-  (function render() {
-    requestAnimationFrame(render);
-    draw(gl, program, vao);
-  })();
-
-  utils.configureControls({
-    "Rendering Mode": {
-      value: renderingMode,
-      options: [
-        "TRIANGLES",
-        "LINES",
-        "POINTS",
-        "LINE_LOOP",
-        "LINE_STRIP",
-        "TRIANGLE_STRIP",
-        "TRIANGLE_FAN",
-      ],
-      onChange: (v) => (renderingMode = v),
-    },
   });
 };
