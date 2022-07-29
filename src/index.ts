@@ -1,44 +1,18 @@
+import { init } from "./app";
 import * as utils from "./utils";
-
-let gl: WebGL2RenderingContext;
-
-const updateClearColor = (...color: [number, number, number, number]) => {
-  gl.clearColor(...color);
-  gl.clear(gl.COLOR_BUFFER_BIT);
-  gl.viewport(0, 0, 0, 0);
-};
-
-const checkKey = (e: KeyboardEvent) => {
-  switch (e.key) {
-    case "1":
-      updateClearColor(0.2, 0.8, 0.2, 1.0);
-      break;
-    case "2":
-      updateClearColor(0.2, 0.2, 0.8, 1.0);
-      break;
-    case "3":
-      updateClearColor(Math.random(), Math.random(), Math.random(), 1.0);
-      break;
-    case "4": {
-      const color = gl.getParameter(gl.COLOR_CLEAR_VALUE);
-      alert(
-        `clearColor = (${color[0].toFixed(1)}, ${color[1].toFixed(
-          1
-        )}, ${color[2].toFixed(1)})`
-      );
-      window.focus();
-      break;
-    }
-  }
-};
+// @ts-expect-error
+import vert from "./default.vert?raw";
+// @ts-expect-error
+import frag from "./default.frag?raw";
 
 window.onload = () => {
   const canvas = utils.getCanvas("app");
   if (!canvas) return;
-  const ctx = utils.getGLContext(canvas);
-  if (!ctx) return;
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
-  gl = ctx;
+  const gl = utils.getGLContext(canvas);
+  if (!gl) return;
 
-  window.onkeydown = checkKey;
+  init(gl, vert, frag);
 };
