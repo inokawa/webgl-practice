@@ -1,3 +1,9 @@
+type Vao = {
+  vao: WebGLVertexArrayObject;
+  vertices: WebGLBuffer;
+  indices: IndexBuffer;
+};
+
 type IndexBuffer = {
   data: WebGLBuffer;
   count: number;
@@ -49,9 +55,7 @@ const initProgram = (
   };
 };
 
-const initBuffers = (
-  gl: WebGL2RenderingContext
-): [WebGLBuffer, IndexBuffer] => {
+const initBuffers = (gl: WebGL2RenderingContext, program: Program): Vao => {
   /*
         V0                    V3
         (-0.5, 0.5, 0)        (0.5, 0.5, 0)
@@ -70,9 +74,15 @@ const initBuffers = (
   // Indices defined in counter-clockwise order
   const indices = [0, 1, 2, 0, 2, 3];
 
+  const squareVAO = gl.createVertexArray()!;
+  gl.bindVertexArray(squareVAO);
+
   const squareVertexBuffer = gl.createBuffer()!;
   gl.bindBuffer(gl.ARRAY_BUFFER, squareVertexBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+  gl.vertexAttribPointer(program.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
+  gl.enableVertexAttribArray(program.aVertexPosition);
 
   const squareIndexBuffer = gl.createBuffer()!;
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, squareIndexBuffer);
@@ -82,35 +92,27 @@ const initBuffers = (
     gl.STATIC_DRAW
   );
 
+  gl.bindVertexArray(null);
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-  return [
-    squareVertexBuffer,
-    { data: squareIndexBuffer, count: indices.length },
-  ];
+  return {
+    vao: squareVAO,
+    vertices: squareVertexBuffer,
+    indices: { data: squareIndexBuffer, count: indices.length },
+  };
 };
 
-const draw = (
-  gl: WebGL2RenderingContext,
-  program: Program,
-  vertexBuffer: WebGLBuffer,
-  indexBuffer: IndexBuffer
-) => {
+const draw = (gl: WebGL2RenderingContext, program: Program, vao: Vao) => {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
   gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
 
   gl.useProgram(program.data);
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-  gl.vertexAttribPointer(program.aVertexPosition, 3, gl.FLOAT, false, 0, 0);
-  gl.enableVertexAttribArray(program.aVertexPosition);
+  gl.bindVertexArray(vao.vao);
 
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer.data);
+  gl.drawElements(gl.TRIANGLES, vao.indices.count, gl.UNSIGNED_SHORT, 0);
 
-  gl.drawElements(gl.TRIANGLES, indexBuffer.count, gl.UNSIGNED_SHORT, 0);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+  gl.bindVertexArray(null);
 };
 
 export const init = (
@@ -120,6 +122,8 @@ export const init = (
 ) => {
   gl.clearColor(0, 0, 0, 1);
   const program = initProgram(gl, vert, frag);
-  const [vertexBuffer, indexBuffer] = initBuffers(gl);
-  draw(gl, program, vertexBuffer, indexBuffer);
+
+  const vao = initBuffers(gl, program);
+
+  draw(gl, program, vao);
 };
