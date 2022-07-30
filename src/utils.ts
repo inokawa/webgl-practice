@@ -220,6 +220,9 @@ export const configureControls = (
 
     controller.onChange((v) => onChange(v, state));
   });
+  return () => {
+    gui.destroy();
+  };
 };
 
 // // Calculate tangets for a given set of vertices
