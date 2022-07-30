@@ -46,7 +46,7 @@ const createShader = (
   return shader;
 };
 
-export const initProgram = <A extends string, U extends string>(
+export const createProgram = <A extends string, U extends string>(
   gl: WebGL2RenderingContext,
   vert: string,
   frag: string,

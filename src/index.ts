@@ -1,4 +1,4 @@
-import { draw, createVertexArray, initProgram } from "./webgl";
+import { draw, createVertexArray, createProgram } from "./webgl";
 import * as utils from "./utils";
 import vert from "./default.vert?raw";
 import frag from "./default.frag?raw";
@@ -9,7 +9,7 @@ const init = async (gl: WebGL2RenderingContext, vert: string, frag: string) => {
   gl.clearColor(0, 0, 0, 1);
   gl.enable(gl.DEPTH_TEST);
 
-  const program = initProgram(
+  const program = createProgram(
     gl,
     vert,
     frag,
