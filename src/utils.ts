@@ -187,11 +187,13 @@ export const configureControls = (
 
     if (isAction(settingValue)) {
       state[key] = settingValue;
-      return gui.add(state, key);
+      gui.add(state, key);
+      return;
     }
     if (isFolder(settingValue)) {
       // If it's a folder, recursively call with folder as root settings element
-      return configureControls(settingValue, { gui: gui.addFolder(key) });
+      configureControls(settingValue, { gui: gui.addFolder(key) });
+      return;
     }
 
     const {
