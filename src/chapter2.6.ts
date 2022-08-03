@@ -12,7 +12,12 @@ export const init = (gl: WebGL2RenderingContext) => {
     -0.5, -0.5, 0, -0.25, 0.5, 0, 0.0, -0.5, 0, 0.25, 0.5, 0, 0.5, -0.5, 0,
   ];
   const indices = [0, 1, 2, 0, 2, 3, 2, 3, 4];
-  const vao = createVertexArray(gl, program, vertices, indices);
+  const vao = createVertexArray(
+    gl,
+    program,
+    [{ name: "aVertexPosition", data: vertices }],
+    indices
+  );
 
   let renderingMode: RenderingMode = "TRIANGLES";
 

@@ -22,7 +22,12 @@ export const init = async (gl: WebGL2RenderingContext) => {
       .range(1, 179)
       .map((i) =>
         import(`./models/nissan-gtr/part${i}.json`).then((model) =>
-          createVertexArray(gl, program, model.vertices, model.indices)
+          createVertexArray(
+            gl,
+            program,
+            [{ name: "aVertexPosition", data: model.vertices }],
+            model.indices
+          )
         )
       )
   );
@@ -74,20 +79,4 @@ export const init = async (gl: WebGL2RenderingContext) => {
       draw(gl, vao, "LINE_LOOP");
     });
   })();
-
-  // utils.configureControls({
-  //   "Rendering Mode": {
-  //     value: renderingMode,
-  //     options: [
-  //       "TRIANGLES",
-  //       "LINES",
-  //       "POINTS",
-  //       "LINE_LOOP",
-  //       "LINE_STRIP",
-  //       "TRIANGLE_STRIP",
-  //       "TRIANGLE_FAN",
-  //     ],
-  //     onChange: (v) => (renderingMode = v),
-  //   },
-  // });
 };

@@ -7,7 +7,7 @@ export type RenderingMode =
   | "TRIANGLE_STRIP"
   | "TRIANGLE_FAN";
 
-type Vao = {
+export type Vao = {
   vao: WebGLVertexArrayObject;
   // vertices: WebGLBuffer;
   // indices: IndexBuffer;
@@ -84,28 +84,25 @@ export const createProgram = <A extends string, U extends string>(
   };
 };
 
-export const createVertexArray = (
+export const createVertexArray = <A extends string>(
   gl: WebGL2RenderingContext,
-  program: Program,
-  vertices: number[],
+  program: Program<A, string>,
+  vertices: { name: A; data: number[] }[],
   indices?: number[]
 ): Vao => {
   const vao = gl.createVertexArray()!;
   gl.bindVertexArray(vao);
 
-  const vertexBuffer = gl.createBuffer()!;
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  const vertexBuffers: WebGLBuffer[] = [];
+  vertices.forEach(({ name, data }) => {
+    const vertexBuffer = gl.createBuffer()!;
+    vertexBuffers.push(vertexBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
 
-  gl.vertexAttribPointer(
-    program.attributes.aVertexPosition,
-    3,
-    gl.FLOAT,
-    false,
-    0,
-    0
-  );
-  gl.enableVertexAttribArray(program.attributes.aVertexPosition);
+    gl.vertexAttribPointer(program.attributes[name], 3, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(program.attributes[name]);
+  });
 
   let indexBuffer: WebGLBuffer | null = null;
   if (indices) {
@@ -134,7 +131,9 @@ export const createVertexArray = (
     },
     dispose: () => {
       gl.deleteVertexArray(self.vao);
-      gl.deleteBuffer(vertexBuffer);
+      vertexBuffers.forEach((vertexBuffer) => {
+        gl.deleteBuffer(vertexBuffer);
+      });
       gl.deleteBuffer(indexBuffer);
     },
   };
