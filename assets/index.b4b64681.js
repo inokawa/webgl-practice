@@ -61,12 +61,12 @@ void main(void) {
     vec4 Is = vec4(0.0, 0.0, 0.0, 1.0);
 
     if (lambertTerm > 0.0) {
-    Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
-    vec3 eyeVec = -vec3(vertex.xyz);
-    vec3 E = normalize(eyeVec);
-    vec3 R = reflect(L, N);
-    float specular = pow(max(dot(R, E), 0.0), uShininess);
-    Is = uLightSpecular * uMaterialSpecular * specular;
+        Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
+        vec3 eyeVec = -vec3(vertex.xyz);
+        vec3 E = normalize(eyeVec);
+        vec3 R = reflect(L, N);
+        float specular = pow(max(dot(R, E), 0.0), uShininess);
+        Is = uLightSpecular * uMaterialSpecular * specular;
     }
 
     // Set varying to be used in fragment shader
