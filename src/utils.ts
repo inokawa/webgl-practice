@@ -125,7 +125,7 @@ export const calculateNormals = (vs: number[], ind: number[]): number[] => {
 // designed for this book for a simpler codebase
 
 type DatGuiSetting = {
-  value?: number | string;
+  value?: number | string | number[];
   min?: number;
   max?: number;
   step?: number;
