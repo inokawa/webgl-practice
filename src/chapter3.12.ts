@@ -78,10 +78,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const normalMatrix = mat4.create();
 
   document.onkeydown = (ev) => {
-    const lightDirection = gl.getUniform(
-      program.data,
-      program.uniforms.uLightDirection
-    );
+    const lightDirection = program.getUniform("uLightDirection");
     const incrementValue = 10;
 
     switch (ev.key) {

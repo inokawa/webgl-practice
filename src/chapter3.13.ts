@@ -159,10 +159,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
         // If object is the light, we update its position
         if (object.alias === "light") {
-          const lightPosition = gl.getUniform(
-            program.data,
-            program.uniforms.uLightPosition
-          );
+          const lightPosition = program.getUniform("uLightPosition");
           mat4.translate(modelViewMatrix, modelViewMatrix, lightPosition);
         }
 

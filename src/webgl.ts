@@ -26,6 +26,7 @@ type Program<A extends string = string, U extends string = string> = {
   attributes: { [key in A]: number };
   use: () => void;
   dispose: () => void;
+  getUniform: (name: U) => any;
 };
 
 const createShader = (
@@ -65,7 +66,7 @@ export const createProgram = <A extends string, U extends string>(
   gl.deleteShader(vertShader);
   gl.deleteShader(fragShader);
 
-  return {
+  const self = {
     data: program,
     attributes: attributes.reduce((acc, k) => {
       acc[k] = gl.getAttribLocation(program, k);
@@ -81,12 +82,16 @@ export const createProgram = <A extends string, U extends string>(
     dispose: () => {
       gl.deleteProgram(program);
     },
+    getUniform: (name: U) => {
+      return gl.getUniform(program, self.uniforms[name]);
+    },
   };
+  return self;
 };
 
-export const createVertexArray = <A extends string>(
+export const createVertexArray = <A extends string, U extends string>(
   gl: WebGL2RenderingContext,
-  program: Program<A, string>,
+  program: Program<A, U>,
   vertices: { name: A; data: number[] }[],
   indices?: number[]
 ): Vao => {
