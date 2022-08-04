@@ -1,4 +1,4 @@
-import { init } from "./chapter3-phong-phong";
+import { init } from "./chapter3.12";
 import * as utils from "./utils";
 
 window.onload = () => {
