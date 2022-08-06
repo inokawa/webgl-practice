@@ -135,7 +135,10 @@ type DatGuiSetting = {
 };
 
 export const configureControls = (
-  settings: Record<string, DatGuiSetting>,
+  settings: Record<
+    string,
+    DatGuiSetting | Record<string, DatGuiSetting> | (() => void)
+  >,
   options: { gui?: dat.GUI; width?: number } = { width: 300 }
 ) => {
   // Check if a gui instance is passed in or create one by default
