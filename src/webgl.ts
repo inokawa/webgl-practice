@@ -1,3 +1,34 @@
+export type Vec2 = number[] | Float32Array;
+export type Vec3 = number[] | Float32Array;
+export type Vec4 = number[] | Float32Array;
+export type BVec2 = number[] | Float32Array;
+export type BVec3 = number[] | Float32Array;
+export type BVec4 = number[] | Float32Array;
+export type Mat2 = number[] | Float32Array;
+export type Mat3 = number[] | Float32Array;
+export type Mat4 = number[] | Float32Array;
+export type GLSLTypeMap = {
+  int: number;
+  float: number;
+  bool: boolean;
+  vec2: Vec2;
+  vec3: Vec3;
+  vec4: Vec4;
+  bvec2: BVec2;
+  bvec3: BVec3;
+  bvec4: BVec4;
+  ivec2: Vec2;
+  ivec3: Vec3;
+  ivec4: Vec4;
+  mat2: Mat2;
+  mat3: Mat3;
+  mat4: Mat4;
+  // sampler2D: TexImageSource | undefined;
+  // samplerCube: never;
+};
+
+type DataType = keyof GLSLTypeMap;
+
 export type RenderingMode =
   | "TRIANGLES"
   | "LINES"
@@ -27,6 +58,11 @@ export type Program<A extends string = string, U extends string = string> = {
   use: () => void;
   dispose: () => void;
   getUniform: (name: U) => any;
+  setUniform: <T extends DataType>(
+    name: U,
+    type: T,
+    value: GLSLTypeMap[T]
+  ) => void;
 };
 
 const createShader = (
@@ -66,7 +102,7 @@ export const createProgram = <A extends string, U extends string>(
   gl.deleteShader(vertShader);
   gl.deleteShader(fragShader);
 
-  const self = {
+  const self: Program<A, U> = {
     data: program,
     attributes: attributes.reduce((acc, k) => {
       acc[k] = gl.getAttribLocation(program, k);
@@ -82,8 +118,63 @@ export const createProgram = <A extends string, U extends string>(
     dispose: () => {
       gl.deleteProgram(program);
     },
-    getUniform: (name: U) => {
+    getUniform: (name) => {
       return gl.getUniform(program, self.uniforms[name]);
+    },
+    setUniform: (name, type, value) => {
+      switch (type) {
+        case "float":
+          gl.uniform1f(self.uniforms[name], value as any);
+          break;
+        case "int":
+          gl.uniform1i(self.uniforms[name], value as any);
+          break;
+        case "bool":
+          gl.uniform1f(self.uniforms[name], value as any);
+          break;
+        case "vec2":
+          gl.uniform2fv(self.uniforms[name], value as any);
+          break;
+        case "ivec2":
+          gl.uniform2iv(self.uniforms[name], value as any);
+          break;
+        case "bvec2":
+          gl.uniform2fv(self.uniforms[name], value as any);
+          break;
+        case "vec3":
+          gl.uniform3fv(self.uniforms[name], value as any);
+          break;
+        case "ivec3":
+          gl.uniform3iv(self.uniforms[name], value as any);
+          break;
+        case "bvec3":
+          gl.uniform3fv(self.uniforms[name], value as any);
+          break;
+        case "vec4":
+          gl.uniform4fv(self.uniforms[name], value as any);
+          break;
+        case "ivec4":
+          gl.uniform4iv(self.uniforms[name], value as any);
+          break;
+        case "bvec4":
+          gl.uniform4fv(self.uniforms[name], value as any);
+          break;
+        case "mat2":
+          gl.uniformMatrix2fv(self.uniforms[name], false, value as any);
+          break;
+        case "mat3":
+          gl.uniformMatrix3fv(self.uniforms[name], false, value as any);
+          break;
+        case "mat4":
+          gl.uniformMatrix4fv(self.uniforms[name], false, value as any);
+          break;
+        case "sampler2D":
+          break;
+        case "samplerCube":
+          break;
+        default:
+          break;
+      }
     },
   };
   return self;

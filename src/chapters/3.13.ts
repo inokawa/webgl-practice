@@ -83,7 +83,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
       min: 1,
       max: 50,
       step: 0.1,
-      onChange: (v) => gl.uniform1f(program.uniforms.uShininess, v),
+      onChange: (v) => program.setUniform("uShininess", "float", v),
     },
     // Spread all values from the reduce onto the controls
     ...["Translate X", "Translate Y", "Translate Z"].reduce(
@@ -94,7 +94,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
           max: 50,
           step: -0.1,
           onChange(_: any, state: any) {
-            gl.uniform3fv(program.uniforms.uLightPosition, [
+            program.setUniform("uLightPosition", "vec3", [
               state["Translate X"],
               state["Translate Y"],
               state["Translate Z"],
@@ -116,14 +116,14 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   program.use();
 
-  gl.uniform3fv(program.uniforms.uLightPosition, lightPosition);
-  gl.uniform4f(program.uniforms.uLightAmbient, 1, 1, 1, 1);
-  gl.uniform4f(program.uniforms.uLightDiffuse, 1, 1, 1, 1);
-  gl.uniform4f(program.uniforms.uLightSpecular, 1, 1, 1, 1);
-  gl.uniform4f(program.uniforms.uMaterialAmbient, 0.1, 0.1, 0.1, 1);
-  gl.uniform4f(program.uniforms.uMaterialDiffuse, 0.5, 0.8, 0.1, 1);
-  gl.uniform4f(program.uniforms.uMaterialSpecular, 0.6, 0.6, 0.6, 1);
-  gl.uniform1f(program.uniforms.uShininess, shininess);
+  program.setUniform("uLightPosition", "vec3", lightPosition);
+  program.setUniform("uLightAmbient", "vec4", [1, 1, 1, 1]);
+  program.setUniform("uLightDiffuse", "vec4", [1, 1, 1, 1]);
+  program.setUniform("uLightSpecular", "vec4", [1, 1, 1, 1]);
+  program.setUniform("uMaterialAmbient", "vec4", [0.1, 0.1, 0.1, 1]);
+  program.setUniform("uMaterialDiffuse", "vec4", [0.5, 0.8, 0.1, 1]);
+  program.setUniform("uMaterialSpecular", "vec4", [0.6, 0.6, 0.6, 1]);
+  program.setUniform("uShininess", "float", shininess);
 
   (function render() {
     requestAnimationFrame(render);
@@ -168,26 +168,14 @@ export const init = async (gl: WebGL2RenderingContext) => {
         mat4.invert(normalMatrix, normalMatrix);
         mat4.transpose(normalMatrix, normalMatrix);
 
-        gl.uniformMatrix4fv(
-          program.uniforms.uModelViewMatrix,
-          false,
-          modelViewMatrix
-        );
-        gl.uniformMatrix4fv(
-          program.uniforms.uProjectionMatrix,
-          false,
-          projectionMatrix
-        );
-        gl.uniformMatrix4fv(
-          program.uniforms.uNormalMatrix,
-          false,
-          normalMatrix
-        );
+        program.setUniform("uModelViewMatrix", "mat4", modelViewMatrix);
+        program.setUniform("uProjectionMatrix", "mat4", projectionMatrix);
+        program.setUniform("uNormalMatrix", "mat4", normalMatrix);
 
         // Set lighting data
-        gl.uniform4fv(program.uniforms.uMaterialAmbient, object.ambient);
-        gl.uniform4fv(program.uniforms.uMaterialDiffuse, object.diffuse);
-        gl.uniform4fv(program.uniforms.uMaterialSpecular, object.specular);
+        program.setUniform("uMaterialAmbient", "vec4", object.ambient);
+        program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
+        program.setUniform("uMaterialSpecular", "vec4", object.specular);
 
         draw(gl, object.vao, "TRIANGLES");
       });
