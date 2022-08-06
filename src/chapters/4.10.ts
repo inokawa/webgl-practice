@@ -6,7 +6,7 @@ import { mat4 } from "gl-matrix";
 import { Scene } from "../Scene";
 import { Floor } from "../Floor";
 import { Axis } from "../Axis";
-import { configureControls } from "../utils";
+import { configureControls, range } from "../utils";
 import { Camera } from "../Camera";
 import { Controls } from "../Controls";
 
@@ -38,20 +38,25 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../models/cone3.json"), "cone");
-  scene.add(new Floor());
-  scene.add(new Axis());
+  const models = await Promise.all(
+    range(1, 179).map((i) => import(`../models/nissan-gtr/part${i}.json`))
+  );
+  models.forEach((m) => {
+    scene.add(m);
+  });
+  scene.add(new Floor(2000, 100));
+  scene.add(new Axis(2000));
 
-  const camera = new Camera("TRACKING_TYPE");
-  camera.goHome([0, 2, 50]);
+  const camera = new Camera("ORBITING_TYPE");
+  camera.goHome([0, 25, 300]);
 
   new Controls(camera, gl.canvas);
 
   program.use();
 
-  program.setUniform("uLightPosition", "vec3", [0, 120, 120]);
-  program.setUniform("uLightAmbient", "vec4", [0.2, 0.2, 0.2, 1]);
-  program.setUniform("uLightDiffuse", "vec4", [1, 1, 1, 1]);
+  program.setUniform("uLightPosition", "vec3", [0, 0, 2120]);
+  program.setUniform("uLightAmbient", "vec4", [0.1, 0.1, 0.1, 1]);
+  program.setUniform("uLightDiffuse", "vec4", [0.7, 0.7, 0.7, 1]);
 
   modelViewMatrix = camera.getViewTransform();
   mat4.identity(projectionMatrix);
@@ -68,7 +73,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
       45,
       gl.canvas.width / gl.canvas.height,
       0.1,
-      1000
+      5000
     );
   }
 
@@ -103,7 +108,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
         result[name] = {
           value: camera.position[i],
           min: -100,
-          max: 100,
+          max: 300,
           step: 0.1,
           onChange: (_: any, state: any) => {
             camera.setPosition([state.X, state.Y, state.Z]);
