@@ -1,7 +1,7 @@
-import { draw, createVertexArray, createProgram, RenderingMode } from "./webgl";
-import * as utils from "./utils";
-import vert from "./chapter2.6.vert?raw";
-import frag from "./chapter2.6.frag?raw";
+import { draw, createVertexArray, createProgram, RenderingMode } from "../webgl";
+import * as utils from "../utils";
+import vert from "./2.6.vert?raw";
+import frag from "./2.6.frag?raw";
 
 export const init = (gl: WebGL2RenderingContext) => {
   gl.clearColor(0, 0, 0, 1);
@@ -15,7 +15,7 @@ export const init = (gl: WebGL2RenderingContext) => {
   const vao = createVertexArray(
     gl,
     program,
-    [{ name: "aVertexPosition", data: vertices }],
+    [{ name: "aVertexPosition", data: vertices, size: 3 }],
     indices
   );
 

@@ -20,7 +20,7 @@ export type Vao = {
 //   count: number;
 // };
 
-type Program<A extends string = string, U extends string = string> = {
+export type Program<A extends string = string, U extends string = string> = {
   data: WebGLProgram;
   uniforms: { [key in U]: WebGLUniformLocation };
   attributes: { [key in A]: number };
@@ -89,23 +89,36 @@ export const createProgram = <A extends string, U extends string>(
   return self;
 };
 
+export type Vertex<A extends string> = {
+  name: A;
+  data: number[];
+  size: number;
+};
+
 export const createVertexArray = <A extends string, U extends string>(
   gl: WebGL2RenderingContext,
   program: Program<A, U>,
-  vertices: { name: A; data: number[] }[],
+  vertices: Vertex<A>[],
   indices?: number[]
 ): Vao => {
   const vao = gl.createVertexArray()!;
   gl.bindVertexArray(vao);
 
   const vertexBuffers: WebGLBuffer[] = [];
-  vertices.forEach(({ name, data }) => {
+  vertices.forEach(({ name, data, size }) => {
     const vertexBuffer = gl.createBuffer()!;
     vertexBuffers.push(vertexBuffer);
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(data), gl.STATIC_DRAW);
 
-    gl.vertexAttribPointer(program.attributes[name], 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(
+      program.attributes[name],
+      size,
+      gl.FLOAT,
+      false,
+      0,
+      0
+    );
     gl.enableVertexAttribArray(program.attributes[name]);
   });
 

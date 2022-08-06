@@ -1,7 +1,7 @@
-import { draw, createVertexArray, createProgram } from "./webgl";
-import * as utils from "./utils";
-import vert from "./chapter3-goraud-lambert.vert?raw";
-import frag from "./chapter3-goraud-lambert.frag?raw";
+import { draw, createVertexArray, createProgram } from "../webgl";
+import * as utils from "../utils";
+import vert from "./3-phong-phong.vert?raw";
+import frag from "./3-phong-phong.frag?raw";
 
 import { mat4 } from "gl-matrix";
 
@@ -714,8 +714,13 @@ export const init = async (gl: WebGL2RenderingContext) => {
       "uProjectionMatrix",
       "uNormalMatrix",
       "uLightDirection",
+      "uLightAmbient",
       "uLightDiffuse",
+      "uLightSpecular",
+      "uMaterialAmbient",
       "uMaterialDiffuse",
+      "uMaterialSpecular",
+      "uShininess",
     ]
   );
 
@@ -723,29 +728,45 @@ export const init = async (gl: WebGL2RenderingContext) => {
     gl,
     program,
     [
-      { name: "aVertexPosition", data: vertices },
-      { name: "aVertexNormal", data: normals },
+      { name: "aVertexPosition", data: vertices, size: 3 },
+      { name: "aVertexNormal", data: normals, size: 3 },
     ],
     indices
   );
 
-  const lightDiffuseColor = [1, 1, 1];
-  const lightDirection = [0, -1, -1];
-  const sphereColor = [0.5, 0.8, 0.1];
+  // If set true, we use the `LINES` drawing primitive instead of `TRIANGLES`
+  let wireframe = false;
+  const shininess = 10,
+    clearColor = [0.9, 0.9, 0.9, 1],
+    lightColor = [1, 1, 1, 1],
+    lightAmbient = [0.03, 0.03, 0.03, 1],
+    lightSpecular = [1, 1, 1, 1],
+    lightDirection = [-0.25, -0.25, -0.25],
+    materialDiffuse = [46 / 256, 99 / 256, 191 / 256, 1],
+    materialAmbient = [1, 1, 1, 1],
+    materialSpecular = [1, 1, 1, 1];
 
   utils.configureControls({
-    "Sphere Color": {
-      value: utils.denormalizeColor(sphereColor),
+    "Light Color": {
+      value: utils.denormalizeColor(lightColor),
       onChange: (v) =>
-        gl.uniform3fv(
-          program.uniforms.uMaterialDiffuse,
-          utils.normalizeColor(v)
-        ),
+        gl.uniform4fv(program.uniforms.uLightDiffuse, utils.normalizeColor(v)),
     },
-    "Light Diffuse Color": {
-      value: utils.denormalizeColor(lightDiffuseColor),
+    "Light Ambient Term": {
+      value: lightAmbient[0],
+      min: 0,
+      max: 1,
+      step: 0.01,
       onChange: (v) =>
-        gl.uniform3fv(program.uniforms.uLightDiffuse, utils.normalizeColor(v)),
+        gl.uniform4fv(program.uniforms.uLightAmbient, [v, v, v, 1]),
+    },
+    "Light Specular Term": {
+      value: lightSpecular[0],
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (v) =>
+        gl.uniform4fv(program.uniforms.uLightSpecular, [v, v, v, 1]),
     },
     // Spread all values from the reduce onto the controls
     ...["Translate X", "Translate Y", "Translate Z"].reduce(
@@ -767,6 +788,48 @@ export const init = async (gl: WebGL2RenderingContext) => {
       },
       {}
     ),
+    "Sphere Color": {
+      value: utils.denormalizeColor(materialDiffuse),
+      onChange: (v) =>
+        gl.uniform4fv(
+          program.uniforms.uMaterialDiffuse,
+          utils.normalizeColor(v)
+        ),
+    },
+    "Material Ambient Term": {
+      value: materialAmbient[0],
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (v) =>
+        gl.uniform4fv(program.uniforms.uMaterialAmbient, [v, v, v, 1]),
+    },
+    "Material Specular Term": {
+      value: materialSpecular[0],
+      min: 0,
+      max: 1,
+      step: 0.01,
+      onChange: (v) =>
+        gl.uniform4fv(program.uniforms.uMaterialSpecular, [v, v, v, 1]),
+    },
+    Shininess: {
+      value: shininess,
+      min: 0,
+      max: 50,
+      step: 0.1,
+      onChange: (v) => gl.uniform1f(program.uniforms.uShininess, v),
+    },
+    Background: {
+      value: utils.denormalizeColor(clearColor),
+      onChange: (v) =>
+        gl.clearColor(
+          ...(utils.normalizeColor(v) as [number, number, number, number])
+        ),
+    },
+    Wireframe: {
+      value: wireframe,
+      onChange: (v) => (wireframe = v),
+    },
   });
 
   const projectionMatrix = mat4.create();
@@ -775,9 +838,14 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   program.use();
 
+  gl.uniform4fv(program.uniforms.uLightDiffuse, lightColor);
+  gl.uniform4fv(program.uniforms.uLightAmbient, lightAmbient);
+  gl.uniform4fv(program.uniforms.uLightSpecular, lightSpecular);
   gl.uniform3fv(program.uniforms.uLightDirection, lightDirection);
-  gl.uniform3fv(program.uniforms.uLightDiffuse, lightDiffuseColor);
-  gl.uniform3fv(program.uniforms.uMaterialDiffuse, sphereColor);
+  gl.uniform4fv(program.uniforms.uMaterialDiffuse, materialDiffuse);
+  gl.uniform4fv(program.uniforms.uMaterialAmbient, materialAmbient);
+  gl.uniform4fv(program.uniforms.uMaterialSpecular, materialSpecular);
+  gl.uniform1f(program.uniforms.uShininess, shininess);
 
   (function render() {
     requestAnimationFrame(render);
@@ -811,6 +879,6 @@ export const init = async (gl: WebGL2RenderingContext) => {
     );
     gl.uniformMatrix4fv(program.uniforms.uNormalMatrix, false, normalMatrix);
 
-    draw(gl, vao, "TRIANGLES");
+    draw(gl, vao, wireframe ? "LINES" : "TRIANGLES");
   })();
 };

@@ -1,7 +1,7 @@
-import { draw, createVertexArray, createProgram } from "./webgl";
-import * as utils from "./utils";
-import vert from "./chapter3-goraud-phong.vert?raw";
-import frag from "./chapter3-goraud-phong.frag?raw";
+import { draw, createVertexArray, createProgram } from "../webgl";
+import * as utils from "../utils";
+import vert from "./3-goraud-phong.vert?raw";
+import frag from "./3-goraud-phong.frag?raw";
 
 import { mat4 } from "gl-matrix";
 
@@ -728,8 +728,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
     gl,
     program,
     [
-      { name: "aVertexPosition", data: vertices },
-      { name: "aVertexNormal", data: normals },
+      { name: "aVertexPosition", data: vertices, size: 3 },
+      { name: "aVertexNormal", data: normals, size: 3 },
     ],
     indices
   );

@@ -1,7 +1,7 @@
-import { draw, createVertexArray, createProgram } from "./webgl";
-import * as utils from "./utils";
-import vert from "./chapter2.vert?raw";
-import frag from "./chapter2.frag?raw";
+import { draw, createVertexArray, createProgram } from "../webgl";
+import * as utils from "../utils";
+import vert from "./2.vert?raw";
+import frag from "./2.frag?raw";
 
 import { mat4 } from "gl-matrix";
 
@@ -21,11 +21,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
     utils
       .range(1, 179)
       .map((i) =>
-        import(`./models/nissan-gtr/part${i}.json`).then((model) =>
+        import(`../models/nissan-gtr/part${i}.json`).then((model) =>
           createVertexArray(
             gl,
             program,
-            [{ name: "aVertexPosition", data: model.vertices }],
+            [{ name: "aVertexPosition", data: model.vertices, size: 3 }],
             model.indices
           )
         )

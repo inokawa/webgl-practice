@@ -1,4 +1,5 @@
 import * as dat from "dat.gui";
+// import { vec3 } from "gl-matrix";
 
 // A set of utility functions for /common operations across our application
 
@@ -198,25 +199,41 @@ export const configureControls = (
 };
 
 // // Calculate tangets for a given set of vertices
-// export const calculateTangents = (vs, tc, ind) => {
-//   const tangents = [];
+// export const calculateTangents = (
+//   vs: number[],
+//   tc: number[],
+//   ind: number[]
+// ): number[] => {
+//   const tangents: [number, number, number] = [];
 
 //   for (let i = 0; i < vs.length / 3; i++) {
 //     tangents[i] = [0, 0, 0];
 //   }
 
-//   let a = [0, 0, 0],
-//     b = [0, 0, 0],
-//     triTangent = [0, 0, 0];
+//   let a: [number, number, number] = [0, 0, 0],
+//     b: [number, number, number] = [0, 0, 0],
+//     triTangent: [number, number, number] = [0, 0, 0];
 
 //   for (let i = 0; i < ind.length; i += 3) {
 //     const i0 = ind[i];
 //     const i1 = ind[i + 1];
 //     const i2 = ind[i + 2];
 
-//     const pos0 = [vs[i0 * 3], vs[i0 * 3 + 1], vs[i0 * 3 + 2]];
-//     const pos1 = [vs[i1 * 3], vs[i1 * 3 + 1], vs[i1 * 3 + 2]];
-//     const pos2 = [vs[i2 * 3], vs[i2 * 3 + 1], vs[i2 * 3 + 2]];
+//     const pos0: [number, number, number] = [
+//       vs[i0 * 3],
+//       vs[i0 * 3 + 1],
+//       vs[i0 * 3 + 2],
+//     ];
+//     const pos1: [number, number, number] = [
+//       vs[i1 * 3],
+//       vs[i1 * 3 + 1],
+//       vs[i1 * 3 + 2],
+//     ];
+//     const pos2: [number, number, number] = [
+//       vs[i2 * 3],
+//       vs[i2 * 3 + 1],
+//       vs[i2 * 3 + 2],
+//     ];
 
 //     const tex0 = [tc[i0 * 2], tc[i0 * 2 + 1]];
 //     const tex1 = [tc[i1 * 2], tc[i1 * 2 + 1]];
@@ -240,7 +257,7 @@ export const configureControls = (
 //   }
 
 //   // Normalize tangents
-//   const ts = [];
+//   const ts: number[] = [];
 //   tangents.forEach((tan) => {
 //     vec3.normalize(tan, tan);
 //     ts.push(tan[0]);
