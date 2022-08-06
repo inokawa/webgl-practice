@@ -2,7 +2,7 @@ import { draw, createProgram } from "../webgl";
 import vert from "./4.10.vert?raw";
 import frag from "./4.10.frag?raw";
 
-import { mat4, vec3 } from "gl-matrix";
+import { mat4 } from "gl-matrix";
 import { Scene } from "../Scene";
 import { Floor } from "../Floor";
 import { Axis } from "../Axis";

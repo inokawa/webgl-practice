@@ -142,7 +142,7 @@ export const configureControls = (
   options: { gui?: dat.GUI; width?: number } = { width: 300 }
 ) => {
   // Check if a gui instance is passed in or create one by default
-  const gui = new dat.GUI(options);
+  const gui = options.gui || new dat.GUI(options);
   const state: Record<string, any> = {};
 
   const isAction = (v: any): v is Function => typeof v === "function";
