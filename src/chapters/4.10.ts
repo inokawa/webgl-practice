@@ -20,6 +20,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
   let modelViewMatrix = mat4.create();
   const normalMatrix = mat4.create();
 
+  let fixedLight = false;
+
   const program = createProgram(
     gl,
     vert,
@@ -34,6 +36,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
       "uLightDiffuse",
       "uMaterialDiffuse",
       "uWireframe",
+      "uFixedLight",
     ]
   );
 
@@ -54,9 +57,10 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   program.use();
 
-  program.setUniform("uLightPosition", "vec3", [0, 0, 2120]);
+  program.setUniform("uLightPosition", "vec3", [100, 100, 100]);
   program.setUniform("uLightAmbient", "vec4", [0.1, 0.1, 0.1, 1]);
   program.setUniform("uLightDiffuse", "vec4", [0.7, 0.7, 0.7, 1]);
+  program.setUniform("uFixedLight", "bool", fixedLight);
 
   modelViewMatrix = camera.getViewTransform();
   mat4.identity(projectionMatrix);
@@ -132,6 +136,10 @@ export const init = async (gl: WebGL2RenderingContext) => {
         step: 0.1,
         onChange: (v) => camera.setAzimuth(v),
       },
+    },
+    "Static Light Position": {
+      value: fixedLight,
+      onChange: (v) => program.setUniform("uFixedLight", "bool", v),
     },
     "Go Home": () => camera.goHome(),
   });

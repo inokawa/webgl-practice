@@ -9,6 +9,7 @@ uniform vec4 uLightAmbient;
 uniform vec4 uLightDiffuse;
 uniform vec4 uMaterialDiffuse;
 uniform bool uWireframe;
+uniform bool uFixedLight;
 
 in vec3 aVertexPosition;
 in vec3 aVertexNormal;
@@ -26,6 +27,13 @@ void main(void) {
         vec3 N = vec3(uNormalMatrix * vec4(aVertexNormal, 0.0));
         // Normalized light position
         vec3 L = normalize(-uLightPosition);
+
+        // If true, then ensure that light position
+        // is appropruately updated
+        if (uFixedLight) {
+          L = vec3(uNormalMatrix * vec4(L, 0.0));
+        }
+
         float lambertTerm = dot(N, -L);
 
         if (lambertTerm == 0.0) {
