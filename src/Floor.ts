@@ -5,9 +5,9 @@ export class Floor implements ObjectBase {
   vertices: number[];
   indices: number[];
   alias: string;
+  wireframe: boolean;
   dimension: number;
   lines: number;
-  wireframe: boolean;
   visible: boolean;
 
   constructor(dimension = 50, lines = 5) {

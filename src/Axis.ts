@@ -5,7 +5,6 @@ export class Axis implements ObjectBase {
   vertices: number[];
   indices: number[];
   alias: string;
-  dimension: number;
   wireframe: boolean;
 
   constructor(dimension = 10) {
@@ -13,7 +12,6 @@ export class Axis implements ObjectBase {
 
     this.wireframe = true;
     this.indices = [0, 1, 2, 3, 4, 5];
-    this.dimension = dimension;
     this.vertices = build(dimension);
   }
 }
