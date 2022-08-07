@@ -45,22 +45,31 @@ export class Scene<A extends string, U extends string> {
         schedule();
       });
     };
-
-    schedule();
-
-    // window.onblur = () => {
-    //   self.stop();
-    //   console.info("Clock stopped");
-    // };
-    // window.onfocus = () => {
-    //   self.start();
-    //   console.info("Clock resumed");
-    // };
-    return () => {
+    const stop = () => {
       isRunning = false;
       if (timer != null) {
         cancelAnimationFrame(timer);
       }
+    };
+
+    schedule();
+
+    const onFocus = () => {
+      isRunning = true;
+      schedule();
+      console.info("Clock resumed");
+    };
+    const onBlur = () => {
+      stop();
+      console.info("Clock stopped");
+    };
+
+    window.addEventListener("focus", onFocus);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      window.removeEventListener("blur", onBlur);
+      stop();
     };
   }
 
