@@ -26,7 +26,6 @@ void main(void) {
     vec3 N = normalize(vNormal);
 
     float lambertTerm = dot(N, -L);
-
     // Ambient
     vec4 Ia = uLightAmbient * uMaterialAmbient;
     // Diffuse

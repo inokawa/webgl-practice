@@ -8,6 +8,8 @@ uniform vec3 uLightPosition;
 uniform vec4 uMaterialDiffuse;
 uniform bool uWireframe;
 uniform bool uUpdateLight;
+uniform vec3 uTranslation;
+uniform bool uTranslate;
 
 in vec3 aVertexPosition;
 in vec3 aVertexNormal;
@@ -19,22 +21,25 @@ out vec3 vEyeVector;
 out vec4 vFinalColor;
 
 void main(void) {
-    // If wireframe is enabled, set color to the diffuse property exclusing lights
     if (uWireframe) {
-        vFinalColor = uMaterialDiffuse;
+    vFinalColor = uMaterialDiffuse;
     }
 
-    vec4 vertex = uModelViewMatrix * vec4(aVertexPosition, 1.0);
+    // Transformed vertex position
+    vec3 vecPosition = aVertexPosition;
+    if (uTranslate) {
+    vecPosition += uTranslation;
+    }
+
+    vec4 vertex = uModelViewMatrix * vec4(vecPosition, 1.0);
+    vNormal = vec3(uNormalMatrix * vec4(aVertexNormal, 1.0));
     vec4 light = vec4(uLightPosition,1.0);
 
-    // If true, then ensure that light position
-    // is appropruately updated
     if (uUpdateLight) {
-        light = uModelViewMatrix * vec4(uLightPosition,1.0);
+    light = uModelViewMatrix * vec4(uLightPosition,1.0);
     }
 
-    vNormal = vec3(uNormalMatrix * vec4(aVertexNormal, 1.0));
-    vLightRay = vertex.xyz-light.xyz;
+    vLightRay = vertex.xyz - light.xyz;
     vEyeVector = -vec3(vertex.xyz);
-    gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(aVertexPosition, 1.0);
+    gl_Position = uProjectionMatrix * vertex;
 }

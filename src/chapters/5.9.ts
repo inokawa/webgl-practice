@@ -2,7 +2,6 @@ import { draw, createProgram } from "../webgl";
 import vert from "./5.9.vert?raw";
 import frag from "./5.9.frag?raw";
 
-import { mat4 } from "gl-matrix";
 import { Scene } from "../Scene";
 import { Floor } from "../Floor";
 import { configureControls } from "../utils";
@@ -23,19 +22,22 @@ export const init = async (gl: WebGL2RenderingContext) => {
     frag,
     ["aVertexPosition", "aVertexNormal", "aVertexColor"],
     [
-      "uModelViewMatrix",
       "uProjectionMatrix",
+      "uModelViewMatrix",
       "uNormalMatrix",
-      "uLightPosition",
+      "uMaterialDiffuse",
+      "uMaterialAmbient",
+      "uMaterialSpecular",
       "uLightAmbient",
       "uLightDiffuse",
       "uLightSpecular",
-      "uMaterialAmbient",
-      "uMaterialDiffuse",
-      "uMaterialSpecular",
-      "uWireframe",
-      "uUpdateLight",
+      "uLightPosition",
       "uShininess",
+      "uUpdateLight",
+      "uWireframe",
+      "uPerVertexColor",
+      "uTranslation",
+      "uTranslate",
     ]
   );
 
@@ -47,13 +49,13 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const scene = new Scene(gl, program);
 
   const gravity = 9.8;
-  const ballsCount = 50;
+  const ballsCount = 500;
   const balls: BouncingBall[] = [];
   scene.add(new Floor(80, 2));
+  scene.add(await import("../models/ball.json"), "ball");
   // Load the number of balls into our scene
   for (let i = 0; i < ballsCount; i++) {
     balls.push(new BouncingBall(gravity));
-    scene.add(await import("../models/ball.json"), `ball${i}`);
   }
 
   const camera = new Camera("ORBITING_TYPE");
@@ -108,24 +110,31 @@ export const init = async (gl: WebGL2RenderingContext) => {
         objects.forEach((object) => {
           // Calculate local transformations
           transforms.calculateModelView();
-          transforms.push();
+          transforms.setMatrixUniforms();
 
           // If the item is a ball
-          if (object.alias && object.alias.indexOf("ball") > -1) {
-            // Get the index by parsing the string
-            const index = parseInt(object.alias.substring(4, 8));
-            const ballTransform = transforms.modelViewMatrix;
-            mat4.translate(ballTransform, ballTransform, balls[index].position);
-            object.diffuse = balls[index].color;
-          }
+          if (object.alias === "ball") {
+            program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
+            program.setUniform("uMaterialSpecular", "vec4", object.specular);
+            program.setUniform("uMaterialAmbient", "vec4", object.ambient);
+            program.setUniform("uWireframe", "bool", false);
+            program.setUniform("uTranslate", "bool", true);
 
-          transforms.setMatrixUniforms();
-          transforms.pop();
+            balls.forEach((ball) => {
+              program.setUniform("uTranslation", "vec3", ball.position);
+              program.setUniform("uMaterialDiffuse", "vec4", ball.color);
+
+              draw(gl, object.vao, "TRIANGLES");
+            });
+
+            return;
+          }
 
           program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
           program.setUniform("uMaterialSpecular", "vec4", object.specular);
           program.setUniform("uMaterialAmbient", "vec4", object.ambient);
           program.setUniform("uWireframe", "bool", object.wireframe);
+          program.setUniform("uTranslate", "bool", false);
 
           draw(gl, object.vao, object.wireframe ? "LINES" : "TRIANGLES");
         });
