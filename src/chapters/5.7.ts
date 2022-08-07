@@ -42,11 +42,12 @@ export const init = async (gl: WebGL2RenderingContext) => {
   let elapsedTime: number,
     initialTime: number,
     fixedLight = false,
-    dxSphere = 0.1,
+    dxSphere = 0.5,
     dxCone = 0.15,
     spherePosition = 0,
     conePosition = 0,
-    frequency = 5;
+    animationRate = 150,
+    simulationRate = 30;
 
   const scene = new Scene(gl, program);
 
@@ -89,9 +90,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   scene.start((objects, time) => {
     elapsedTime = time - initialTime;
-    if (elapsedTime < frequency) return;
+    if (elapsedTime < animationRate) return;
 
-    let steps = Math.floor(elapsedTime / frequency);
+    let steps = Math.floor(elapsedTime / simulationRate);
     while (steps > 0) {
       spherePosition += dxSphere;
       if (spherePosition >= 30 || spherePosition <= -30) {
