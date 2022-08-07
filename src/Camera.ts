@@ -6,7 +6,7 @@ type CameraType = "ORBITING_TYPE" | "TRACKING_TYPE";
 export class Camera {
   type: CameraType;
   position: vec3;
-  // private focus: vec3;
+  private focus: vec3;
   private home: vec3;
   private up: vec3;
   private right: vec3;
@@ -15,14 +15,14 @@ export class Camera {
   private steps: number;
   azimuth: number;
   elevation: number;
-  //   private fov: number;
-  //   private minZ: number;
-  //   private maxZ: number;
+  fov: number;
+  minZ: number;
+  maxZ: number;
 
   constructor(type: CameraType = "ORBITING_TYPE") {
     this.type = type;
     this.position = vec3.create();
-    // this.focus = vec3.create();
+    this.focus = vec3.create();
     this.home = vec3.create();
 
     this.up = vec3.create();
@@ -36,9 +36,9 @@ export class Camera {
     this.steps = 0;
     this.azimuth = 0;
     this.elevation = 0;
-    // this.fov = 45;
-    // this.minZ = 0.1;
-    // this.maxZ = 10000;
+    this.fov = 45;
+    this.minZ = 0.1;
+    this.maxZ = 10000;
   }
 
   // Return whether the camera is in orbiting mode
@@ -99,11 +99,11 @@ export class Camera {
     this.update();
   }
 
-  // // Change camera focus
-  // setFocus(focus: vec3) {
-  //   vec3.copy(this.focus, focus);
-  //   this.update();
-  // }
+  // Change camera focus
+  setFocus(focus: vec3) {
+    vec3.copy(this.focus, focus);
+    this.update();
+  }
 
   // Set camera azimuth
   setAzimuth(azimuth: number) {
