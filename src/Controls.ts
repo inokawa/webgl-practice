@@ -30,6 +30,7 @@ export class Controls {
     canvas.onmousemove = (event) => this.onMouseMove(event);
     window.onkeydown = (event) => this.onKeyDown(event);
     window.onkeyup = (event) => this.onKeyUp(event);
+    window.onwheel = (event) => this.onWheel(event);
   }
 
   //   // Sets picker for picking objects
@@ -132,6 +133,10 @@ export class Controls {
 
   private onKeyUp(event: KeyboardEvent) {
     this.ctrl = event.ctrlKey;
+  }
+
+  private onWheel(event: WheelEvent) {
+    this.camera.changeZoom(event.deltaY);
   }
 
   dolly(value: number) {

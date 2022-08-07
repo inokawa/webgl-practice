@@ -17,7 +17,6 @@ export const init = async (gl: WebGL2RenderingContext) => {
   gl.depthFunc(gl.LEQUAL);
 
   const projectionMatrix = mat4.create();
-  let modelViewMatrix = mat4.create();
   const normalMatrix = mat4.create();
 
   let fixedLight = false;
@@ -62,11 +61,10 @@ export const init = async (gl: WebGL2RenderingContext) => {
   program.setUniform("uLightDiffuse", "vec4", [0.7, 0.7, 0.7, 1]);
   program.setUniform("uFixedLight", "bool", fixedLight);
 
-  modelViewMatrix = camera.getViewTransform();
   mat4.identity(projectionMatrix);
   updateTransforms();
   mat4.identity(normalMatrix);
-  mat4.copy(normalMatrix, modelViewMatrix);
+  mat4.copy(normalMatrix, camera.getViewTransform());
   mat4.invert(normalMatrix, normalMatrix);
   mat4.transpose(normalMatrix, normalMatrix);
 
