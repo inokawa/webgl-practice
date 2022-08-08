@@ -25,19 +25,19 @@ void main(void) {
     float lambertTerm = 1.0;
 
     if (uUseLambert) {
-    vec3 normal = vec3(uNormalMatrix * vec4(aVertexNormal, 1.0));
-    vec3 lightDirection = normalize(-uLightPosition);
-    lambertTerm = max(dot(normal, -lightDirection), 0.20);
+        vec3 normal = vec3(uNormalMatrix * vec4(aVertexNormal, 1.0));
+        vec3 lightDirection = normalize(-uLightPosition);
+        lambertTerm = max(dot(normal, -lightDirection), 0.20);
     }
 
     vec4 Ia = uLightAmbient * uMaterialAmbient;
     vec4 Id = vec4(0.0);
 
     if (uUseVertexColor) {
-    Id = uLightDiffuse * aVertexColor * lambertTerm;
+        Id = uLightDiffuse * aVertexColor * lambertTerm;
     }
     else {
-    Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
+        Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
     }
 
     vColor = vec4(vec3(Ia + Id), uAlpha);
