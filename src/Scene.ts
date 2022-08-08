@@ -73,10 +73,10 @@ export class Scene<A extends string, U extends string> {
     };
   }
 
-  //   // Find the item with given alias
-  //   get(alias) {
-  //     return this.objects.find((object) => object.alias === alias);
-  //   }
+  // Find the item with given alias
+  get(alias: string) {
+    return this.objects.find((object) => object.alias === alias);
+  }
 
   //   // Asynchronously load a file
   //   load(filename, alias, attributes) {
