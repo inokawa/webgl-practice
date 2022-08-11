@@ -36,7 +36,8 @@ void main(void) {
             N = normalize(vNormal[i]);
             lambertTerm	= dot(N, -L);
             if (lambertTerm > uCutOff) {
-                finalColor += uLightDiffuse[i] * uMaterialDiffuse;
+                // finalColor += uLightDiffuse[i] * uMaterialDiffuse;
+                finalColor += uLightDiffuse[i] * uMaterialDiffuse * lambertTerm;
             }
         }
 
