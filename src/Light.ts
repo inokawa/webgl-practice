@@ -34,9 +34,9 @@ export class Light {
     this.specular = specular.slice(0);
   }
 
-  // setProperty(property: string, value: any) {
-  //   this[property] = value;
-  // }
+  setProperty(property: string, value: any) {
+    (this as any)[property] = value;
+  }
 }
 
 // Helper class to maintain a collection of lights
