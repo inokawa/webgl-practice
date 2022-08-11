@@ -68,7 +68,8 @@ void main(void) {
             lambertTerm	= dot(N, -L);
             if (lambertTerm > uCutOff) {
                 // finalColor += uLightDiffuse[i] * uMaterialDiffuse;
-                finalColor += uLightDiffuse[i] * uMaterialDiffuse * lambertTerm;
+                // finalColor += uLightDiffuse[i] * uMaterialDiffuse * lambertTerm;
+                finalColor += uLightDiffuse[i] * uMaterialDiffuse * pow(lambertTerm, 10.0 * uCutOff);
             }
         }
 
