@@ -34,10 +34,10 @@ void main(void) {
         for(int i = 0; i < numLights; i++) {
             L = normalize(vLightRay[i]);
             lambertTerm = dot(N, -L);
-        if (lambertTerm > uCutOff) {
-            finalColor += uLightDiffuse[i] * uMaterialDiffuse * lambertTerm;
+            if (lambertTerm > uCutOff) {
+                finalColor += uLightDiffuse[i] * uMaterialDiffuse * lambertTerm;
+            }
         }
-    }
 
         fragColor = vec4(vec3(finalColor += Ia), 1.0);
     }

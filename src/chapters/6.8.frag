@@ -19,27 +19,27 @@ out vec4 fragColor;
 
 void main(void) {
     if (uWireframe || uLightSource) {
-    fragColor = uMaterialDiffuse;
+        fragColor = uMaterialDiffuse;
     }
     else {
-    vec4 Ia = uLightAmbient * uMaterialAmbient;
-    // Base color
-    vec4 finalColor = vec4(0.0, 0.0, 0.0, 1.0);
+        vec4 Ia = uLightAmbient * uMaterialAmbient;
+        // Base color
+        vec4 finalColor = vec4(0.0, 0.0, 0.0, 1.0);
 
-    vec3 L = vec3(0.0);
-    vec3 N = vec3(0.0);
-    float lambertTerm = 0.0;
+        vec3 L = vec3(0.0);
+        vec3 N = vec3(0.0);
+        float lambertTerm = 0.0;
 
-    // Iterate over lights
-    for(int i = 0; i < numLights; i++) {
-        L = normalize(vLightRay[i]);
-        N = normalize(vNormal[i]);
-        lambertTerm	= dot(N, -L);
-        if (lambertTerm > uCutOff) {
-        finalColor += uLightDiffuse[i] * uMaterialDiffuse;
+        // Iterate over lights
+        for(int i = 0; i < numLights; i++) {
+            L = normalize(vLightRay[i]);
+            N = normalize(vNormal[i]);
+            lambertTerm	= dot(N, -L);
+            if (lambertTerm > uCutOff) {
+                finalColor += uLightDiffuse[i] * uMaterialDiffuse;
+            }
         }
-    }
 
-    fragColor = vec4(vec3(finalColor), 1.0);
+        fragColor = vec4(vec3(finalColor), 1.0);
     }
 }

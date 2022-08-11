@@ -20,7 +20,7 @@ out vec4 vFinalColor;
 
 void main(void) {
     if (uWireframe) {
-    vFinalColor = uMaterialDiffuse;
+        vFinalColor = uMaterialDiffuse;
     }
 
     vec4 vertex = uModelViewMatrix * vec4(aVertexPosition, 1.0);
@@ -28,7 +28,7 @@ void main(void) {
     vec4 light = vec4(uLightPosition, 1.0);
 
     if (uUpdateLight) {
-    light = uModelViewMatrix * vec4(uLightPosition,1.0);
+        light = uModelViewMatrix * vec4(uLightPosition,1.0);
     }
 
     vLightRay = vertex.xyz-light.xyz;

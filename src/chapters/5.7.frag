@@ -19,29 +19,29 @@ out vec4 fragColor;
 
 void main(void) {
     if (uWireframe) {
-    fragColor = vFinalColor;
+        fragColor = vFinalColor;
     }
     else {
-    vec3 L = normalize(vLightRay);
-    vec3 N = normalize(vNormal);
+        vec3 L = normalize(vLightRay);
+        vec3 N = normalize(vNormal);
 
-    float lambertTerm = dot(N, -L);
+        float lambertTerm = dot(N, -L);
 
-    // Ambient
-    vec4 Ia = uLightAmbient * uMaterialAmbient;
-    // Diffuse
-    vec4 Id = vec4(0.0, 0.0, 0.0, 1.0);
-    // Specular
-    vec4 Is = vec4(0.0, 0.0, 0.0, 1.0);
+        // Ambient
+        vec4 Ia = uLightAmbient * uMaterialAmbient;
+        // Diffuse
+        vec4 Id = vec4(0.0, 0.0, 0.0, 1.0);
+        // Specular
+        vec4 Is = vec4(0.0, 0.0, 0.0, 1.0);
 
-    if (lambertTerm > 0.0) {
-        Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
-        vec3 E = normalize(vEyeVector);
-        vec3 R = reflect(L, N);
-        float specular = pow( max(dot(R, E), 0.0), uShininess);
-        Is = uLightSpecular * uMaterialSpecular * specular;
-    }
+        if (lambertTerm > 0.0) {
+            Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
+            vec3 E = normalize(vEyeVector);
+            vec3 R = reflect(L, N);
+            float specular = pow( max(dot(R, E), 0.0), uShininess);
+            Is = uLightSpecular * uMaterialSpecular * specular;
+        }
 
-    fragColor = vec4(vec3(Ia + Id + Is), 1.0);
+        fragColor = vec4(vec3(Ia + Id + Is), 1.0);
     }
 }

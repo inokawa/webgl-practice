@@ -28,13 +28,13 @@ void main(void) {
     vec4 Is = vec4(0.0, 0.0, 0.0, 1.0);
 
     if (lambertTerm > 0.0) {
-    // Update diffuse
-    Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
-    vec3 E = normalize(vEyeVector);
-    vec3 R = reflect(L, N);
-    float specular = pow( max(dot(R, E), 0.0), uShininess);
-    // Update specular
-    Is = uLightSpecular * uMaterialSpecular * specular;
+        // Update diffuse
+        Id = uLightDiffuse * uMaterialDiffuse * lambertTerm;
+        vec3 E = normalize(vEyeVector);
+        vec3 R = reflect(L, N);
+        float specular = pow( max(dot(R, E), 0.0), uShininess);
+        // Update specular
+        Is = uLightSpecular * uMaterialSpecular * specular;
     }
 
     // Final fragment color takes into account ambient, diffuse, and specular
