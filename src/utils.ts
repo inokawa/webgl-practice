@@ -44,8 +44,8 @@ export const autoResizeCanvas = (canvas: HTMLCanvasElement) => {
 };
 
 // Normalize colors from 0-255 to 0-1
-export const normalizeColor = (color: number[]) => {
-  return color.map((c) => c / 255);
+export const normalizeColor = <T extends number[]>(color: T): T => {
+  return color.map((c) => c / 255) as T;
 };
 
 // De-normalize colors from 0-1 to 0-255

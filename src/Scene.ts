@@ -208,38 +208,38 @@ export class Scene<A extends string, U extends string> {
   //     this.objects.splice(index, 1);
   //   }
 
-  //   // Renders an item first
-  //   renderFirst(alias) {
-  //     const object = this.get(alias);
-  //     const index = this.objects.indexOf(object);
-  //     if (index === 0) return;
+  // Renders an item first
+  renderFirst(alias: string) {
+    const object = this.get(alias);
+    const index = this.objects.indexOf(object!);
+    if (index === 0) return;
 
-  //     this.objects.splice(index, 1);
-  //     this.objects.splice(0, 0, object);
-  //     this.printRenderOrder();
-  //   }
+    this.objects.splice(index, 1);
+    this.objects.splice(0, 0, object!);
+    this.printRenderOrder();
+  }
 
-  //   // Renders an item last
-  //   renderLast(alias) {
-  //     const object = this.get(alias);
-  //     const index = this.objects.indexOf(object);
-  //     if (index === 0) return;
+  // Renders an item last
+  renderLast(alias: string) {
+    const object = this.get(alias);
+    const index = this.objects.indexOf(object!);
+    if (index === 0) return;
 
-  //     this.objects.splice(index, 1);
-  //     this.objects.push(object);
-  //     this.printRenderOrder();
-  //   }
+    this.objects.splice(index, 1);
+    this.objects.push(object!);
+    this.printRenderOrder();
+  }
 
-  //   // Pushes an item up the render priority
-  //   renderSooner(alias) {
-  //     const object = this.get(alias);
-  //     const index = this.objects.indexOf(object);
-  //     if (index === 0) return;
+  // Pushes an item up the render priority
+  renderSooner(alias: string) {
+    const object = this.get(alias);
+    const index = this.objects.indexOf(object!);
+    if (index === 0) return;
 
-  //     this.objects.splice(index, 1);
-  //     this.objects.splice(index - 1, 0, object);
-  //     this.printRenderOrder();
-  //   }
+    this.objects.splice(index, 1);
+    this.objects.splice(index - 1, 0, object!);
+    this.printRenderOrder();
+  }
 
   //   // Pushes an item down the render priority
   //   renderLater(alias) {
@@ -252,9 +252,9 @@ export class Scene<A extends string, U extends string> {
   //     this.printRenderOrder();
   //   }
 
-  //   // Construct and print a string representing the render order (useful for debugging)
-  //   printRenderOrder() {
-  //     const renderOrder = this.objects.map((object) => object.alias).join(" > ");
-  //     console.info("Render Order:", renderOrder);
-  //   }
+  // Construct and print a string representing the render order (useful for debugging)
+  printRenderOrder() {
+    const renderOrder = this.objects.map((object) => object.alias).join(" > ");
+    console.info("Render Order:", renderOrder);
+  }
 }
