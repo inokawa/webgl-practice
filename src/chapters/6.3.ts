@@ -66,7 +66,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   program.setUniform("uUseVertexColor", "bool", useVertexColors);
   program.setUniform("uUseLambert", "bool", true);
 
-  configureControls({
+  const disposeGui = configureControls({
     Lambert: {
       value: true,
       onChange: (v) => program.setUniform("uUseLambert", "bool", v),
@@ -121,4 +121,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   });
+  return () => {
+    scene.dispose();
+    disposeGui();
+  };
 };

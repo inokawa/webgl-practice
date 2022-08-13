@@ -35,7 +35,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const projectionMatrix = mat4.create();
   const modelViewMatrix = mat4.create();
 
+  let stop = false;
   (function render() {
+    if (stop) return;
     requestAnimationFrame(render);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -79,4 +81,12 @@ export const init = async (gl: WebGL2RenderingContext) => {
       draw(gl, vao, "LINE_LOOP");
     });
   })();
+
+  return () => {
+    stop = true;
+    program.dispose();
+    models.forEach((vao) => {
+      vao.dispose();
+    });
+  };
 };

@@ -103,7 +103,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   program.setUniform("uCutOff", "float", lightCutOff);
   program.setUniform("uLightAmbient", "vec4", [1, 1, 1, 1]);
 
-  configureControls({
+  const disposeGui = configureControls({
     "Camera Type": {
       value: camera.type,
       options: ["TRACKING_TYPE", "ORBITING_TYPE"],
@@ -191,4 +191,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   });
+  return () => {
+    scene.dispose();
+    disposeGui();
+  };
 };

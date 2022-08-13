@@ -27,6 +27,7 @@ export class Scene<A extends string, U extends string> {
   private gl: WebGL2RenderingContext;
   private program: Program<A, U>;
   private objects: GLObject[];
+  private stop?: () => void;
 
   constructor(gl: WebGL2RenderingContext, program: Program<A, U>) {
     this.gl = gl;
@@ -66,11 +67,11 @@ export class Scene<A extends string, U extends string> {
 
     window.addEventListener("focus", onFocus);
     window.addEventListener("blur", onBlur);
-    return () => {
+    return (this.stop = () => {
       window.removeEventListener("focus", onFocus);
       window.removeEventListener("blur", onBlur);
       stop();
-    };
+    });
   }
 
   // Find the item with given alias
@@ -256,5 +257,13 @@ export class Scene<A extends string, U extends string> {
   printRenderOrder() {
     const renderOrder = this.objects.map((object) => object.alias).join(" > ");
     console.info("Render Order:", renderOrder);
+  }
+
+  dispose() {
+    this.stop?.();
+    this.program.dispose();
+    this.objects.forEach((o) => {
+      o.vao.dispose();
+    });
   }
 }

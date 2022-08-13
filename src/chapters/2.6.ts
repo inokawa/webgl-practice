@@ -1,4 +1,9 @@
-import { draw, createVertexArray, createProgram, RenderingMode } from "../webgl";
+import {
+  draw,
+  createVertexArray,
+  createProgram,
+  RenderingMode,
+} from "../webgl";
 import * as utils from "../utils";
 import vert from "./2.6.vert?raw";
 import frag from "./2.6.frag?raw";
@@ -23,7 +28,9 @@ export const init = (gl: WebGL2RenderingContext) => {
 
   program.use();
 
+  let stop = false;
   (function render() {
+    if (stop) return;
     requestAnimationFrame(render);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -32,7 +39,7 @@ export const init = (gl: WebGL2RenderingContext) => {
     draw(gl, vao, renderingMode);
   })();
 
-  utils.configureControls({
+  const disposeGui = utils.configureControls({
     "Rendering Mode": {
       value: renderingMode,
       options: [
@@ -47,4 +54,11 @@ export const init = (gl: WebGL2RenderingContext) => {
       onChange: (v) => (renderingMode = v),
     },
   });
+
+  return () => {
+    stop = true;
+    disposeGui();
+    program.dispose();
+    vao.dispose();
+  };
 };

@@ -121,7 +121,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   // const coordinatesElement = document.getElementById("coordinates");
 
-  configureControls({
+  const disposeGui = configureControls({
     Coordinates: {
       value: coordinates,
       options: [WORLD_COORDINATES, CAMERA_COORDINATES],
@@ -157,25 +157,22 @@ export const init = async (gl: WebGL2RenderingContext) => {
       ),
     },
     Rotation: {
-      ...["Rotate X", "Rotate Y", "Rotate Z"].reduce(
-        (result: any, name, i) => {
-          result[name] = {
-            value: rotation[i],
-            min: -180,
-            max: 180,
-            step: 0.1,
-            onChange(_: any, state: any) {
-              rotation = [
-                state["Rotate X"],
-                state["Rotate Y"],
-                state["Rotate Z"],
-              ];
-            },
-          };
-          return result;
-        },
-        {}
-      ),
+      ...["Rotate X", "Rotate Y", "Rotate Z"].reduce((result: any, name, i) => {
+        result[name] = {
+          value: rotation[i],
+          min: -180,
+          max: 180,
+          step: 0.1,
+          onChange(_: any, state: any) {
+            rotation = [
+              state["Rotate X"],
+              state["Rotate Y"],
+              state["Rotate Z"],
+            ];
+          },
+        };
+        return result;
+      }, {}),
     },
   });
 
@@ -197,4 +194,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   });
+
+  return () => {
+    scene.dispose();
+    disposeGui();
+  };
 };

@@ -113,7 +113,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
     gl.blendColor(...blendingColor, blendingAlpha);
   }
 
-  configureControls({
+  const disposeGui = configureControls({
     Blending: {
       value: blending,
       onChange: updateBlending,
@@ -274,4 +274,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   });
+  return () => {
+    scene.dispose();
+    disposeGui();
+  };
 };

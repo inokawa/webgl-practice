@@ -119,7 +119,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
     }[interpolationType];
     position = interpolate!();
   }
-  configureControls({
+  const disposeGui = configureControls({
     "Camera Type": {
       value: camera.type,
       options: ["ORBITING_TYPE", "TRACKING_TYPE"],
@@ -292,6 +292,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   });
+
+  return () => {
+    scene.dispose();
+    disposeGui();
+  };
 
   function doLinearInterpolation(): [number, number, number][] {
     const position: [number, number, number][] = [];

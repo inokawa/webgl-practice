@@ -89,7 +89,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   // const coordinatesElement = document.getElementById("coordinates");
 
-  configureControls({
+  const disposeGui = configureControls({
     "Camera Type": {
       value: camera.type,
       options: ["TRACKING_TYPE", "ORBITING_TYPE"],
@@ -160,4 +160,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   });
+
+  return () => {
+    scene.dispose();
+    disposeGui();
+  };
 };

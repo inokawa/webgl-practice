@@ -175,7 +175,7 @@ template {
   font-style: normal;
   font-variant: normal;
   line-height: 1.5em;
-  color: white;
+  /* color: white; */
   padding: 0;
   margin: 0;
 }

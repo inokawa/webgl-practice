@@ -746,7 +746,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
     materialAmbient = [1, 1, 1, 1],
     materialSpecular = [1, 1, 1, 1];
 
-  utils.configureControls({
+  const disposeGui = utils.configureControls({
     "Light Color": {
       value: utils.denormalizeColor(lightColor),
       onChange: (v) =>
@@ -847,7 +847,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
   gl.uniform4fv(program.uniforms.uMaterialSpecular, materialSpecular);
   gl.uniform1f(program.uniforms.uShininess, shininess);
 
+  let stop = false;
   (function render() {
+    if (stop) return;
     requestAnimationFrame(render);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -881,4 +883,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
     draw(gl, vao, wireframe ? "LINES" : "TRIANGLES");
   })();
+
+  return () => {
+    stop = true;
+    disposeGui();
+    program.dispose();
+    vao.dispose();
+  };
 };

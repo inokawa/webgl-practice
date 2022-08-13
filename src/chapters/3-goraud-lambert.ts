@@ -733,7 +733,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const lightDirection = [0, -1, -1];
   const sphereColor = [0.5, 0.8, 0.1];
 
-  utils.configureControls({
+  const disposeGui = utils.configureControls({
     "Sphere Color": {
       value: utils.denormalizeColor(sphereColor),
       onChange: (v) =>
@@ -779,7 +779,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
   gl.uniform3fv(program.uniforms.uLightDiffuse, lightDiffuseColor);
   gl.uniform3fv(program.uniforms.uMaterialDiffuse, sphereColor);
 
+  let stop = false;
   (function render() {
+    if (stop) return;
     requestAnimationFrame(render);
 
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -813,4 +815,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
     draw(gl, vao, "TRIANGLES");
   })();
+
+  return () => {
+    stop = true;
+    disposeGui();
+    program.dispose();
+    vao.dispose();
+  };
 };

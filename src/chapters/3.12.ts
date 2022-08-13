@@ -77,7 +77,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const modelViewMatrix = mat4.create();
   const normalMatrix = mat4.create();
 
-  document.onkeydown = (ev) => {
+  const onKeydown = (ev: KeyboardEvent) => {
     const lightDirection = program.getUniform("uLightDirection");
     const incrementValue = 10;
 
@@ -117,6 +117,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
     gl.uniform3fv(program.uniforms.uLightDirection, lightDirection);
   };
+  document.addEventListener("keydown", onKeydown);
 
   program.use();
 
@@ -125,7 +126,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
   gl.uniform4fv(program.uniforms.uLightDiffuse, [0.5, 0.5, 0.5, 1]);
   gl.uniform4f(program.uniforms.uMaterialDiffuse, 0.1, 0.5, 0.8, 1);
 
+  let stop = false;
   (function render() {
+    if (stop) return;
     requestAnimationFrame(render);
     const { width, height } = gl.canvas;
 
@@ -166,4 +169,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
     draw(gl, vao, "TRIANGLES");
   })();
+
+  return () => {
+    stop = true;
+    document.removeEventListener("keydown", onKeydown);
+    program.dispose();
+    vao.dispose();
+  };
 };

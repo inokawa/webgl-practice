@@ -67,7 +67,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   function getObject(alias: string) {
     return objects.find((object) => object.alias === alias);
   }
-  utils.configureControls({
+  const disposeGui = utils.configureControls({
     "Sphere Color": {
       value: [0, 255, 0],
       onChange: (v) =>
@@ -125,7 +125,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
   program.setUniform("uMaterialSpecular", "vec4", [0.6, 0.6, 0.6, 1]);
   program.setUniform("uShininess", "float", shininess);
 
+  let stop = false;
   (function render() {
+    if (stop) return;
     requestAnimationFrame(render);
 
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -184,4 +186,12 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   })();
+  return () => {
+    stop = true;
+    disposeGui();
+    program.dispose();
+    objects.forEach((o) => {
+      o.vao.dispose();
+    });
+  };
 };
