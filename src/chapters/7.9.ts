@@ -1,16 +1,16 @@
 import { draw, createProgram, loadTexture } from "../webgl";
-import vert from "./7.7.vert?raw";
-import frag from "./7.7.frag?raw";
-import imgUrl from "../images/webgl-marble.png";
+import vert from "./7.9.vert?raw";
+import frag from "./7.9.frag?raw";
+import imgUrl from "../images/webgl.png";
+import img2Url from "../images/light.png";
 
 import { Scene } from "../Scene";
-import { configureControls } from "../utils";
 import { Camera } from "../Camera";
 import { Controls } from "../Controls";
 import { Transforms } from "../Transforms";
 
 export const init = async (gl: WebGL2RenderingContext) => {
-  gl.clearColor(1, 1, 1, 1);
+  gl.clearColor(0.9, 0.9, 0.9, 1);
   gl.clearDepth(100);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LESS);
@@ -21,14 +21,20 @@ export const init = async (gl: WebGL2RenderingContext) => {
     vert,
     frag,
     ["aVertexPosition", "aVertexTextureCoords"],
-    ["uProjectionMatrix", "uModelViewMatrix", "uNormalMatrix", "uSampler"]
+    [
+      "uProjectionMatrix",
+      "uModelViewMatrix",
+      "uNormalMatrix",
+      "uSampler",
+      "uSampler2",
+    ]
   );
 
   const scene = new Scene(gl, program);
   scene.add(await import("../models/cube-texture.json"));
 
   const camera = new Camera("ORBITING_TYPE");
-  camera.goHome([0, 0, 3]);
+  camera.goHome([0, 0, 4]);
   camera.setFocus([0, 0, 0]);
   camera.setAzimuth(45);
   camera.setElevation(-30);
@@ -40,23 +46,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   program.use();
 
   const texture = loadTexture(gl, imgUrl);
-
-  const wrapOptions = ["CLAMP_TO_EDGE", "REPEAT", "MIRRORED_REPEAT"];
-
-  const disposeGui = configureControls({
-    ...["TEXTURE_WRAP_S", "TEXTURE_WRAP_T"].reduce((result: any, axis: any) => {
-      result[axis] = {
-        value: wrapOptions[1],
-        options: wrapOptions,
-        onChange: (v: any) => {
-          texture.use(() => {
-            gl.texParameteri(gl.TEXTURE_2D, (gl as any)[axis], (gl as any)[v]);
-          });
-        },
-      };
-      return result;
-    }, {}),
-  });
+  const texture2 = loadTexture(gl, img2Url);
 
   scene.start((objects) => {
     gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
@@ -76,6 +66,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
         if (object.textureCoords) {
           texture.bind(0);
           program.setUniform("uSampler", "sampler2D", 0);
+          texture2.bind(1);
+          program.setUniform("uSampler", "sampler2D", 1);
         }
 
         // Draw
@@ -97,7 +89,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   });
   return () => {
     scene.dispose();
-    disposeGui();
     texture.dispose();
+    texture2.dispose();
   };
 };

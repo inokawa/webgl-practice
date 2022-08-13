@@ -298,8 +298,8 @@ export const loadTexture = (gl: WebGL2RenderingContext, url: string) => {
     set(newUrl: string) {
       image.src = newUrl;
     },
-    bind() {
-      gl.activeTexture(gl.TEXTURE0);
+    bind(i: 0 | 1 | 2) {
+      gl.activeTexture(gl[`TEXTURE${i}`]);
       gl.bindTexture(gl.TEXTURE_2D, texture);
     },
     dispose() {
