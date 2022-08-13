@@ -8,7 +8,7 @@ import * as utils from "../utils";
 import vert from "./2.6.vert?raw";
 import frag from "./2.6.frag?raw";
 
-export const init = (gl: WebGL2RenderingContext) => {
+export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0, 0, 0, 1);
   gl.enable(gl.DEPTH_TEST);
   const program = createProgram(gl, vert, frag, ["aVertexPosition"], []);

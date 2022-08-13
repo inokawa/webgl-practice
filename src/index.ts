@@ -17,79 +17,37 @@ window.onload = async () => {
   const gl = utils.getGLContext(canvas);
   if (!gl) return;
 
-  let dispose: () => void = await (await import("./chapters/7.4")).init(gl);
+  let dispose: (() => void) | undefined;
 
   const menuEl = document.getElementById("menu")!;
-  appendMenu(menuEl, "2.6", async () => {
-    dispose();
-    dispose = await (await import("./chapters/2.6")).init(gl);
+  const menus: [
+    string,
+    () => Promise<{ init: (gl: WebGL2RenderingContext) => Promise<() => void> }>
+  ][] = [
+    ["2.6", () => import("./chapters/2.6")],
+    ["2", () => import("./chapters/2")],
+    ["3.goraud-lambert", () => import("./chapters/3-goraud-lambert")],
+    ["3.goraud-phong", () => import("./chapters/3-goraud-phong")],
+    ["3.phong-phong", () => import("./chapters/3-phong-phong")],
+    ["3.12", () => import("./chapters/3.12")],
+    ["3.13", () => import("./chapters/3.13")],
+    ["4.8", () => import("./chapters/4.8")],
+    ["4.10", () => import("./chapters/4.10")],
+    ["5.7", () => import("./chapters/5.7")],
+    ["5.9", () => import("./chapters/5.9")],
+    ["5.12", () => import("./chapters/5.12")],
+    ["6.3", () => import("./chapters/6.3")],
+    ["6.6", () => import("./chapters/6.6")],
+    ["6.8", () => import("./chapters/6.8")],
+    ["6.12", () => import("./chapters/6.12")],
+    ["6.14", () => import("./chapters/6.14")],
+    ["7.4", () => import("./chapters/7.4")],
+  ];
+  menus.forEach(([name, data]) => {
+    appendMenu(menuEl, name, async () => {
+      dispose?.();
+      dispose = await (await data()).init(gl);
+    });
   });
-  appendMenu(menuEl, "2", async () => {
-    dispose();
-    dispose = await (await import("./chapters/2")).init(gl);
-  });
-  appendMenu(menuEl, "3.goraud-lambert", async () => {
-    dispose();
-    dispose = await (await import("./chapters/3-goraud-lambert")).init(gl);
-  });
-  appendMenu(menuEl, "3.goraud-phong", async () => {
-    dispose();
-    dispose = await (await import("./chapters/3-goraud-phong")).init(gl);
-  });
-  appendMenu(menuEl, "3.phong-phong", async () => {
-    dispose();
-    dispose = await (await import("./chapters/3-phong-phong")).init(gl);
-  });
-  appendMenu(menuEl, "3.12", async () => {
-    dispose();
-    dispose = await (await import("./chapters/3.12")).init(gl);
-  });
-  appendMenu(menuEl, "3.13", async () => {
-    dispose();
-    dispose = await (await import("./chapters/3.13")).init(gl);
-  });
-  appendMenu(menuEl, "4.8", async () => {
-    dispose();
-    dispose = await (await import("./chapters/4.8")).init(gl);
-  });
-  appendMenu(menuEl, "4.10", async () => {
-    dispose();
-    dispose = await (await import("./chapters/4.10")).init(gl);
-  });
-  appendMenu(menuEl, "5.7", async () => {
-    dispose();
-    dispose = await (await import("./chapters/5.7")).init(gl);
-  });
-  appendMenu(menuEl, "5.9", async () => {
-    dispose();
-    dispose = await (await import("./chapters/5.9")).init(gl);
-  });
-  appendMenu(menuEl, "5.12", async () => {
-    dispose();
-    dispose = await (await import("./chapters/5.12")).init(gl);
-  });
-  appendMenu(menuEl, "6.3", async () => {
-    dispose();
-    dispose = await (await import("./chapters/6.3")).init(gl);
-  });
-  appendMenu(menuEl, "6.6", async () => {
-    dispose();
-    dispose = await (await import("./chapters/6.6")).init(gl);
-  });
-  appendMenu(menuEl, "6.8", async () => {
-    dispose();
-    dispose = await (await import("./chapters/6.8")).init(gl);
-  });
-  appendMenu(menuEl, "6.12", async () => {
-    dispose();
-    dispose = await (await import("./chapters/6.12")).init(gl);
-  });
-  appendMenu(menuEl, "6.14", async () => {
-    dispose();
-    dispose = await (await import("./chapters/6.14")).init(gl);
-  });
-  appendMenu(menuEl, "7.4", async () => {
-    dispose();
-    dispose = await (await import("./chapters/7.4")).init(gl);
-  });
+  (menuEl.children[menuEl.children.length - 1] as HTMLElement).click();
 };
