@@ -264,14 +264,6 @@ export const draw = (
   });
 };
 
-const loadImage = (url: string): Promise<HTMLImageElement> =>
-  new Promise((resolve, reject) => {
-    const image = new Image();
-    image.src = url;
-    image.onload = () => resolve(image);
-    image.onerror = reject;
-  });
-
 export const loadTexture = (gl: WebGL2RenderingContext, url: string) => {
   const texture = gl.createTexture();
   const image = new Image();

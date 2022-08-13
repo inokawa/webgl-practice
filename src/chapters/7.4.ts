@@ -1,4 +1,4 @@
-import { draw, createProgram, loadTexture } from "../webgl";
+import { draw, createProgram } from "../webgl";
 import vert from "./7.4.vert?raw";
 import frag from "./7.4.frag?raw";
 import imgUrl from "../images/webgl.png";
