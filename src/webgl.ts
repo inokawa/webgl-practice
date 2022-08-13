@@ -263,3 +263,32 @@ export const draw = (
     }
   });
 };
+
+const loadImage = (url: string): Promise<HTMLImageElement> =>
+  new Promise((resolve, reject) => {
+    const image = new Image();
+    image.src = url;
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+  });
+
+export const loadTexture = (gl: WebGL2RenderingContext, url: string) => {
+  const texture = gl.createTexture();
+  (async () => {
+    const image = await loadImage(url);
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+  })();
+  return {
+    bind() {
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+    },
+    dispose() {
+      gl.deleteTexture(texture);
+    },
+  };
+};

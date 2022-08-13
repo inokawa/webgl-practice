@@ -1,4 +1,4 @@
-import { draw, createProgram } from "../webgl";
+import { draw, createProgram, loadTexture } from "../webgl";
 import vert from "./7.4.vert?raw";
 import frag from "./7.4.frag?raw";
 import imgUrl from "../images/webgl.png";
@@ -69,16 +69,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   program.setUniform("uUseVertexColor", "bool", useVertexColors);
   program.setUniform("uUseLambert", "bool", true);
 
-  const texture = gl.createTexture();
-  const image = new Image();
-  image.src = imgUrl;
-  image.onload = () => {
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-  };
+  const texture = loadTexture(gl, imgUrl);
 
   const disposeGui = configureControls({
     "Use Lambert Term": {
@@ -119,8 +110,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
         // Activate texture
         if (object.textureCoords) {
-          gl.activeTexture(gl.TEXTURE0);
-          gl.bindTexture(gl.TEXTURE_2D, texture);
+          texture.bind();
           program.setUniform("uSampler", "sampler2D", 0);
         }
 
@@ -144,5 +134,6 @@ export const init = async (gl: WebGL2RenderingContext) => {
   return () => {
     scene.dispose();
     disposeGui();
+    texture.dispose();
   };
 };
