@@ -1,4 +1,4 @@
-import{_ as l,c as p}from"./index.d7b26453.js";import{c as M,d as x}from"./webgl.68fb3a22.js";import{S as C}from"./Scene.e56fc398.js";import{C as P,a as _}from"./Controls.edd272aa.js";import{T as w}from"./Transforms.c39cd1ae.js";import{L as T,a as E}from"./Light.96552d4a.js";import{F as D}from"./Floor.7b1674dd.js";import{t as N}from"./mat4.356e1817.js";const V=`#version 300 es
+import{_ as l,c as p}from"./index.bd1470a7.js";import{c as M,d as x}from"./webgl.35ad78b4.js";import{S as C}from"./Scene.440e4328.js";import{C as P,a as _}from"./Controls.e1269ed6.js";import{T as w}from"./Transforms.c39cd1ae.js";import{L as T,a as E}from"./Light.96552d4a.js";import{F as D}from"./Floor.7b1674dd.js";import{t as N}from"./mat4.356e1817.js";const V=`#version 300 es
 precision mediump float;
 
 const int numLights = 4;
