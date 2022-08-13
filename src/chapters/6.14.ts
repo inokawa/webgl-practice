@@ -1,23 +1,17 @@
 import { draw, createProgram } from "../webgl";
-import vert from "./6.12.vert?raw";
-import frag from "./6.12.frag?raw";
+import vert from "./6.14.vert?raw";
+import frag from "./6.14.frag?raw";
 
 import { Scene } from "../Scene";
-import { configureControls, denormalizeColor, normalizeColor } from "../utils";
+import { configureControls, normalizeColor } from "../utils";
 import { Camera } from "../Camera";
 import { Controls } from "../Controls";
 import { Transforms } from "../Transforms";
-import { Floor } from "../Floor";
-import { mat4 } from "gl-matrix";
 
 export const init = async (gl: WebGL2RenderingContext) => {
-  let blending = true,
-    depthTest = true,
-    culling = true,
-    lambert = true,
-    floor = true,
-    coneColor: [number, number, number, number] = [0, 1, 1, 1],
-    sphereColor: [number, number, number, number] = [0.7, 0, 0.7, 1],
+  let lambert = true,
+    showBackFace = true,
+    showFrontFace = true,
     blendingColor: [number, number, number] = [0, 1, 0],
     blendingAlpha = 1;
 
@@ -38,7 +32,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
     gl,
     vert,
     frag,
-    ["aVertexPosition", "aVertexNormal"],
+    ["aVertexPosition", "aVertexColor"],
     [
       "uProjectionMatrix",
       "uModelViewMatrix",
@@ -49,32 +43,19 @@ export const init = async (gl: WebGL2RenderingContext) => {
       "uLightDiffuse",
       "uLightPosition",
       "uWireframe",
+      "uAlpha",
       "uUseLambert",
     ]
   );
 
   const scene = new Scene(gl, program);
-  scene.add(new Floor(80, 2));
-  scene.add(
-    {
-      ...(await import("../models/cone3.json")),
-      diffuse: coneColor,
-    },
-    "cone"
-  );
-  scene.add(
-    {
-      ...(await import("../models/sphere2.json")),
-      diffuse: sphereColor,
-    },
-    "sphere"
-  );
+  scene.add(await import("../models/cube-complex.json"), "cube");
 
   const camera = new Camera("ORBITING_TYPE");
-  camera.goHome([0, 5, 35]);
+  camera.goHome([0, 0, 4]);
   camera.setFocus([0, 0, 0]);
-  camera.setAzimuth(25);
-  camera.setElevation(-25);
+  camera.setAzimuth(50);
+  camera.setElevation(-30);
 
   new Controls(camera, gl.canvas);
 
@@ -85,6 +66,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   program.setUniform("uLightPosition", "vec3", [0, 5, 20]);
   program.setUniform("uLightAmbient", "vec4", [1, 1, 1, 1]);
   program.setUniform("uLightDiffuse", "vec4", [1, 1, 1, 1]);
+  program.setUniform("uAlpha", "float", 0.5);
   program.setUniform("uUseLambert", "bool", lambert);
 
   const blendFuncs = [
@@ -104,8 +86,6 @@ export const init = async (gl: WebGL2RenderingContext) => {
     "ONE_MINUS_CONSTANT_ALPHA",
   ];
 
-  const getState = (v: boolean) => (v ? "enable" : "disable");
-
   function updateBlending(value = true) {
     gl[value ? "enable" : "disable"](gl.BLEND);
     gl.blendFunc(blendingSource, blendingTarget);
@@ -114,51 +94,29 @@ export const init = async (gl: WebGL2RenderingContext) => {
   }
 
   configureControls({
-    Blending: {
-      value: blending,
+    "Alpha Blending": {
+      value: true,
       onChange: updateBlending,
     },
-    "Depth Testing": {
-      value: depthTest,
-      onChange: (v) => gl[getState(v)](gl.DEPTH_TEST),
+    "Render Front Face": {
+      value: true,
+      onChange: (v) => (showFrontFace = v),
     },
-    "Back Face Culling": {
-      value: culling,
-      onChange: (v) => gl[getState(v)](gl.CULL_FACE),
+    "Render Back Face": {
+      value: true,
+      onChange: (v) => (showBackFace = v),
     },
-    Lambert: {
-      value: lambert,
-      onChange: (v) => (lambert = v),
+    "Alpha Value": {
+      value: 0.5,
+      min: 0,
+      max: 1,
+      step: 0.1,
+      onChange: (v) => program.setUniform("uAlpha", "float", v),
     },
-    Floor: {
-      value: floor,
-      onChange: (v) => (floor = v),
-    },
-    ...[
-      { name: "Sphere", id: "sphere", color: sphereColor },
-      { name: "Cone", id: "cone", color: coneColor },
-    ].reduce((result, data) => {
-      result = {
-        ...result,
-        [`${data.name} Alpha`]: {
-          value: 1,
-          min: 0,
-          max: 1,
-          step: 0.1,
-          onChange: (v: any) => (scene.get(data.id)!.diffuse[3] = v),
-        },
-        [`${data.name} Color`]: {
-          value: denormalizeColor(data.color),
-          onChange: (v: any) =>
-            (scene.get(data.id)!.diffuse = normalizeColor(v)),
-        },
-      };
-      return result;
-    }, {}),
     "Blend Function": {
       value: blendingEquation,
       options: ["FUNC_ADD", "FUNC_SUBTRACT", "FUNC_REVERSE_SUBTRACT"],
-      onChange: (v: any) => {
+      onChange: (v) => {
         blendingEquation = (gl as any)[v];
         updateBlending();
       },
@@ -174,7 +132,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
     Destination: {
       value: blendingTarget,
       options: blendFuncs,
-      onChange: (v: any) => {
+      onChange: (v) => {
         blendingTarget = (gl as any)[v];
         updateBlending();
       },
@@ -186,7 +144,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
         updateBlending();
       },
     },
-    "Alpha Value": {
+    "Constant Alpha": {
       value: 1,
       min: 0,
       max: 1,
@@ -195,33 +153,6 @@ export const init = async (gl: WebGL2RenderingContext) => {
         blendingAlpha = v;
         updateBlending();
       },
-    },
-    "Render Order": {
-      value: "Cone First",
-      options: ["Cone First", "Sphere First"],
-      onChange: (v) => {
-        if (v === "Sphere First") {
-          scene.renderSooner("sphere");
-          scene.renderFirst("floor");
-        } else {
-          scene.renderSooner("cone");
-          scene.renderFirst("floor");
-        }
-      },
-    },
-    Reset: () => {
-      depthTest = true;
-      blending = true;
-      culling = true;
-      lambert = true;
-      floor = true;
-      blendingEquation = gl.FUNC_ADD;
-      blendingSource = gl.SRC_ALPHA;
-      blendingTarget = gl.ONE_MINUS_SRC_ALPHA;
-      camera.goHome([0, 5, 35]);
-      camera.setFocus([0, 0, 0]);
-      camera.setAzimuth(25);
-      camera.setElevation(-25);
     },
   });
 
@@ -232,43 +163,27 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
     try {
       objects.forEach((object) => {
-        const { alias } = object;
-
-        if (alias === "floor" && !floor) return;
-
         transforms.calculateModelView();
         transforms.push();
-
-        if (alias === "cone") {
-          mat4.translate(
-            transforms.modelViewMatrix,
-            transforms.modelViewMatrix,
-            [0, 0, -3.5]
-          );
-        }
-
-        if (alias === "sphere") {
-          mat4.scale(
-            transforms.modelViewMatrix,
-            transforms.modelViewMatrix,
-            [0.5, 0.5, 0.5]
-          );
-          mat4.translate(
-            transforms.modelViewMatrix,
-            transforms.modelViewMatrix,
-            [0, 0, 2.5]
-          );
-        }
-
         transforms.setMatrixUniforms();
         transforms.pop();
 
         program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
         program.setUniform("uMaterialAmbient", "vec4", object.ambient);
         program.setUniform("uWireframe", "bool", object.wireframe);
-        program.setUniform("uUseLambert", "bool", lambert);
 
-        draw(gl, object.vao, object.wireframe ? "LINES" : "TRIANGLES");
+        if (object.wireframe) {
+          draw(gl, object.vao, "LINES");
+        } else {
+          if (showBackFace) {
+            gl.cullFace(gl.FRONT);
+            draw(gl, object.vao, "TRIANGLES");
+          }
+          if (showFrontFace) {
+            gl.cullFace(gl.BACK);
+            draw(gl, object.vao, "TRIANGLES");
+          }
+        }
       });
     } catch (error) {
       console.error(error);
