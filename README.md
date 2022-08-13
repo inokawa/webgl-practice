@@ -1,6 +1,6 @@
-# webgl-3d-practice
+# webgl-practice
 
-[![deploy](https://github.com/inokawa/webgl-3d-practice/actions/workflows/deploy.yml/badge.svg)](https://github.com/inokawa/webgl-3d-practice/actions/workflows/deploy.yml)
+[![deploy](https://github.com/inokawa/webgl-practice/actions/workflows/deploy.yml/badge.svg)](https://github.com/inokawa/webgl-practice/actions/workflows/deploy.yml)
 
 WIP
 
@@ -8,7 +8,7 @@ Mostly following [the book (`Real-Time 3D Graphics with WebGL 2`)](https://githu
 
 ## Demo
 
-https://inokawa.github.io/webgl-3d-practice/
+https://inokawa.github.io/webgl-practice/
 
 ## Start
 

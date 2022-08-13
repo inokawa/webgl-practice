@@ -1,5 +1,5 @@
 {
-  "name": "webgl-3d-practice",
+  "name": "webgl-practice",
   "version": "1.0.0",
   "private": true,
   "scripts": {
@@ -21,10 +21,10 @@
   "author": "inokawa",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/inokawa/webgl-3d-practice.git"
+    "url": "git+https://github.com/inokawa/webgl-practice.git"
   },
   "bugs": {
-    "url": "https://github.com/inokawa/webgl-3d-practice/issues"
+    "url": "https://github.com/inokawa/webgl-practice/issues"
   },
-  "homepage": "https://github.com/inokawa/webgl-3d-practice#readme"
+  "homepage": "https://github.com/inokawa/webgl-practice#readme"
 }
