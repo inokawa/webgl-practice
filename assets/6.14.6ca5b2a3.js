@@ -1,4 +1,4 @@
-import{_ as L,c as S,n as p}from"./index.8873bc6e.js";import{c as N,d as C}from"./webgl.c08f1d3d.js";import{S as T}from"./Scene.38846500.js";import{C as E,a as M}from"./Controls.11e62dc7.js";import{T as O}from"./Transforms.c39cd1ae.js";import"./mat4.356e1817.js";const R=`#version 300 es
+import{_ as L,c as S,n as p}from"./index.d7ba286c.js";import{c as N,d as C}from"./webgl.e38acebe.js";import{S as T}from"./Scene.b04197bc.js";import{C as E,a as M}from"./Controls.700ad968.js";import{T as O}from"./Transforms.c39cd1ae.js";import"./mat4.356e1817.js";const R=`#version 300 es
 precision mediump float;
 
 uniform float uAlpha;
