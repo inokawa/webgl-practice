@@ -17,7 +17,7 @@ window.onload = async () => {
   const gl = utils.getGLContext(canvas);
   if (!gl) return;
 
-  let dispose: () => void = await (await import("./chapters/6.14")).init(gl);
+  let dispose: () => void = await (await import("./chapters/7.4")).init(gl);
 
   const menuEl = document.getElementById("menu")!;
   appendMenu(menuEl, "2.6", async () => {
@@ -87,5 +87,9 @@ window.onload = async () => {
   appendMenu(menuEl, "6.14", async () => {
     dispose();
     dispose = await (await import("./chapters/6.14")).init(gl);
+  });
+  appendMenu(menuEl, "7.4", async () => {
+    dispose();
+    dispose = await (await import("./chapters/7.4")).init(gl);
   });
 };

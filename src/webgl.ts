@@ -23,7 +23,7 @@ export type GLSLTypeMap = {
   mat2: Mat2;
   mat3: Mat3;
   mat4: Mat4;
-  // sampler2D: TexImageSource | undefined;
+  sampler2D: number;
   // samplerCube: never;
 };
 
@@ -169,6 +169,7 @@ export const createProgram = <A extends string, U extends string>(
           gl.uniformMatrix4fv(self.uniforms[name], false, value as any);
           break;
         case "sampler2D":
+          gl.uniform1i(self.uniforms[name], value as any);
           break;
         case "samplerCube":
           break;
