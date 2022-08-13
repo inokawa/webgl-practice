@@ -24,7 +24,7 @@ export type GLSLTypeMap = {
   mat3: Mat3;
   mat4: Mat4;
   sampler2D: number;
-  // samplerCube: never;
+  samplerCube: number;
 };
 
 type DataType = keyof GLSLTypeMap;
@@ -172,6 +172,7 @@ export const createProgram = <A extends string, U extends string>(
           gl.uniform1i(self.uniforms[name], value as any);
           break;
         case "samplerCube":
+          gl.uniform1i(self.uniforms[name], value as any);
           break;
         default:
           break;
