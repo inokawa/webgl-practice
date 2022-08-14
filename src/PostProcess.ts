@@ -170,7 +170,7 @@ export class PostProcess {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null);
   }
 
-  draw(setup: () => void) {
+  draw(setup?: () => void) {
     const gl = this.gl;
     const { width, height } = this.canvas;
 
@@ -221,7 +221,7 @@ export class PostProcess {
       ]);
     }
 
-    setup();
+    setup?.();
 
     // Draw using TRIANGLES primitive
     gl.drawArrays(gl.TRIANGLES, 0, 6);

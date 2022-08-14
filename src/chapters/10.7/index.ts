@@ -14,6 +14,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearDepth(100);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LESS);
+  gl.disable(gl.BLEND);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
   const program = createProgram(
