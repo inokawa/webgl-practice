@@ -3,10 +3,10 @@ import {
   createVertexArray,
   createProgram,
   RenderingMode,
-} from "../webgl";
-import * as utils from "../utils";
-import vert from "./2.6.vert?raw";
-import frag from "./2.6.frag?raw";
+} from "../../webgl";
+import * as utils from "../../utils";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0, 0, 0, 1);

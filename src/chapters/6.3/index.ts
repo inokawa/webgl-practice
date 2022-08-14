@@ -1,12 +1,12 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./6.3.vert?raw";
-import frag from "./6.3.frag?raw";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
-import { Scene } from "../Scene";
-import { configureControls } from "../utils";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
-import { Transforms } from "../Transforms";
+import { Scene } from "../../Scene";
+import { configureControls } from "../../utils";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
+import { Transforms } from "../../Transforms";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0.9, 0.9, 0.9, 1);
@@ -39,11 +39,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const scene = new Scene(gl, program);
 
   scene.add(
-    { ...(await import("../models/cube-simple.json")), hidden: false } as any,
+    { ...(await import("../../models/cube-simple.json")), hidden: false } as any,
     "simpleCube"
   );
   scene.add(
-    { ...(await import("../models/cube-complex.json")), hidden: true } as any,
+    { ...(await import("../../models/cube-complex.json")), hidden: true } as any,
     "complexCube"
   );
 

@@ -1,35 +1,57 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./7.5.vert?raw";
-import frag from "./7.5.frag?raw";
-import imgUrl from "../images/webgl.png";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
+import imgUrl from "../../images/webgl.png";
 
-import { Scene } from "../Scene";
-import { configureControls } from "../utils";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
-import { Transforms } from "../Transforms";
+import { Scene } from "../../Scene";
+import { configureControls } from "../../utils";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
+import { Transforms } from "../../Transforms";
 
 export const init = async (gl: WebGL2RenderingContext) => {
+  let useVertexColors = false;
+
   gl.clearColor(0.9, 0.9, 0.9, 1);
   gl.clearDepth(100);
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.LESS);
+  gl.enable(gl.BLEND);
+  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
   gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
 
   const program = createProgram(
     gl,
     vert,
     frag,
-    ["aVertexPosition", "aVertexTextureCoords"],
-    ["uProjectionMatrix", "uModelViewMatrix", "uNormalMatrix", "uSampler"]
+    [
+      "aVertexPosition",
+      "aVertexNormal",
+      "aVertexColor",
+      "aVertexTextureCoords",
+    ],
+    [
+      "uProjectionMatrix",
+      "uModelViewMatrix",
+      "uNormalMatrix",
+      "uMaterialDiffuse",
+      "uMaterialAmbient",
+      "uLightAmbient",
+      "uLightDiffuse",
+      "uLightPosition",
+      "uWireframe",
+      "uAlpha",
+      "uUseVertexColor",
+      "uUseLambert",
+      "uSampler",
+    ]
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../models/cube-texture.json"));
+  scene.add(await import("../../models/cube-texture.json"));
 
   const camera = new Camera("ORBITING_TYPE");
-  camera.goHome([0, 0, 0]);
-  camera.dolly(-4);
+  camera.goHome([0, 0, 4]);
   camera.setFocus([0, 0, 0]);
   camera.setAzimuth(45);
   camera.setElevation(-30);
@@ -40,6 +62,13 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   program.use();
 
+  program.setUniform("uLightPosition", "vec3", [0, 5, 20]);
+  program.setUniform("uLightAmbient", "vec4", [1, 1, 1, 1]);
+  program.setUniform("uLightDiffuse", "vec4", [1, 1, 1, 1]);
+  program.setUniform("uAlpha", "float", 1.0);
+  program.setUniform("uUseVertexColor", "bool", useVertexColors);
+  program.setUniform("uUseLambert", "bool", true);
+
   const texture = gl.createTexture();
   const image = new Image();
   image.src = imgUrl;
@@ -48,45 +77,23 @@ export const init = async (gl: WebGL2RenderingContext) => {
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.generateMipmap(gl.TEXTURE_2D);
     gl.bindTexture(gl.TEXTURE_2D, null);
   };
-
   const disposeGui = configureControls({
-    Distance: {
-      value: 0,
+    "Use Lambert Term": {
+      value: true,
+      onChange: (v) => program.setUniform("uUseLambert", "bool", v),
+    },
+    "Use Per Vertex": {
+      value: useVertexColors,
+      onChange: (v) => (useVertexColors = v),
+    },
+    "Alpha Value": {
+      value: 1,
       min: 0,
-      max: 20,
+      max: 1,
       step: 0.1,
-      onChange: (v) => {
-        camera.dolly(-v);
-        camera.update();
-      },
-    },
-    "Mag Filter": {
-      value: "NEAREST",
-      options: ["NEAREST", "LINEAR"],
-      onChange: (v) => {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, (gl as any)[v]);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-      },
-    },
-    "Min Filter": {
-      value: "NEAREST",
-      options: [
-        "NEAREST",
-        "LINEAR",
-        "NEAREST_MIPMAP_NEAREST",
-        "LINEAR_MIPMAP_NEAREST",
-        "NEAREST_MIPMAP_LINEAR",
-        "LINEAR_MIPMAP_LINEAR",
-      ],
-      onChange: (v) => {
-        gl.bindTexture(gl.TEXTURE_2D, texture);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, (gl as any)[v]);
-        gl.bindTexture(gl.TEXTURE_2D, null);
-      },
+      onChange: (v) => program.setUniform("uAlpha", "float", v),
     },
   });
 
@@ -103,6 +110,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
         transforms.push();
         transforms.setMatrixUniforms();
         transforms.pop();
+
+        program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
+        program.setUniform("uMaterialAmbient", "vec4", object.ambient);
+        program.setUniform("uWireframe", "bool", object.wireframe);
+        program.setUniform("uUseVertexColor", "bool", useVertexColors);
 
         // Activate texture
         if (object.textureCoords) {

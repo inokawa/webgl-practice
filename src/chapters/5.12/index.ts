@@ -1,14 +1,14 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./5.12.vert?raw";
-import frag from "./5.12.frag?raw";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
-import { Scene } from "../Scene";
-import { Floor } from "../Floor";
-import { configureControls } from "../utils";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
-import { Transforms } from "../Transforms";
-import { Axis } from "../Axis";
+import { Scene } from "../../Scene";
+import { Floor } from "../../Floor";
+import { configureControls } from "../../utils";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
+import { Transforms } from "../../Transforms";
+import { Axis } from "../../Axis";
 import { mat4 } from "gl-matrix";
 
 export const init = async (gl: WebGL2RenderingContext) => {
@@ -65,27 +65,27 @@ export const init = async (gl: WebGL2RenderingContext) => {
   scene.add(new Floor(zDimension, 2));
   scene.add(new Axis(zDimension));
   scene.add(
-    { ...(await import("../models/ball.json")), diffuse: ballColor },
+    { ...(await import("../../models/ball.json")), diffuse: ballColor },
     "ball"
   );
   scene.add(
-    { ...(await import("../models/flag.json")), diffuse: flagStartColor },
+    { ...(await import("../../models/flag.json")), diffuse: flagStartColor },
     "flagStart"
   );
   scene.add(
-    { ...(await import("../models/flag.json")), diffuse: flagEndColor },
+    { ...(await import("../../models/flag.json")), diffuse: flagEndColor },
     "flagEnd"
   );
   scene.add(
-    { ...(await import("../models/flag.json")), diffuse: flagColor },
+    { ...(await import("../../models/flag.json")), diffuse: flagColor },
     "flag1"
   );
   scene.add(
-    { ...(await import("../models/flag.json")), diffuse: flagColor },
+    { ...(await import("../../models/flag.json")), diffuse: flagColor },
     "flag2"
   );
   scene.add(
-    { ...(await import("../models/flag.json")), diffuse: flagColor },
+    { ...(await import("../../models/flag.json")), diffuse: flagColor },
     "flag3"
   );
 

@@ -1,12 +1,12 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./6.14.vert?raw";
-import frag from "./6.14.frag?raw";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
-import { Scene } from "../Scene";
-import { configureControls, normalizeColor } from "../utils";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
-import { Transforms } from "../Transforms";
+import { Scene } from "../../Scene";
+import { configureControls, normalizeColor } from "../../utils";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
+import { Transforms } from "../../Transforms";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   let lambert = true,
@@ -49,7 +49,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../models/cube-complex.json"), "cube");
+  scene.add(await import("../../models/cube-complex.json"), "cube");
 
   const camera = new Camera("ORBITING_TYPE");
   camera.goHome([0, 0, 4]);

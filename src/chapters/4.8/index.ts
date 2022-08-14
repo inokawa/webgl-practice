@@ -1,12 +1,12 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./4.8.vert?raw";
-import frag from "./4.8.frag?raw";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
 import { mat4, vec3 } from "gl-matrix";
-import { Scene } from "../Scene";
-import { Floor } from "../Floor";
-import { Axis } from "../Axis";
-import { configureControls } from "../utils";
+import { Scene } from "../../Scene";
+import { Floor } from "../../Floor";
+import { Axis } from "../../Axis";
+import { configureControls } from "../../utils";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0.9, 0.9, 0.9, 1);
@@ -44,7 +44,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../models/cone3.json"), "cone");
+  scene.add(await import("../../models/cone3.json"), "cone");
   scene.add(new Floor());
   scene.add(new Axis());
 

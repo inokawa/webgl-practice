@@ -1,18 +1,18 @@
-import { draw, createProgram, loadTexture } from "../webgl";
-import vert from "./7.11.vert?raw";
-import frag from "./7.11.frag?raw";
-import imgUrl from "../images/webgl.png";
-import positiveX from "../images/cubemap/positive-x.png";
-import negativeX from "../images/cubemap/negative-x.png";
-import positiveY from "../images/cubemap/positive-y.png";
-import negativeY from "../images/cubemap/negative-y.png";
-import positiveZ from "../images/cubemap/positive-z.png";
-import negativeZ from "../images/cubemap/negative-z.png";
+import { draw, createProgram, loadTexture } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
+import imgUrl from "../../images/webgl.png";
+import positiveX from "../../images/cubemap/positive-x.png";
+import negativeX from "../../images/cubemap/negative-x.png";
+import positiveY from "../../images/cubemap/positive-y.png";
+import negativeY from "../../images/cubemap/negative-y.png";
+import positiveZ from "../../images/cubemap/positive-z.png";
+import negativeZ from "../../images/cubemap/negative-z.png";
 
-import { Scene } from "../Scene";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
-import { Transforms } from "../Transforms";
+import { Scene } from "../../Scene";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
+import { Transforms } from "../../Transforms";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0.9, 0.9, 0.9, 1);
@@ -36,7 +36,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../models/cube-texture.json"));
+  scene.add(await import("../../models/cube-texture.json"));
 
   const camera = new Camera("ORBITING_TYPE");
   camera.goHome([0, 0, 4]);

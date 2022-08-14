@@ -1,7 +1,7 @@
-import { draw, createVertexArray, createProgram } from "../webgl";
-import * as utils from "../utils";
-import vert from "./3.13.vert?raw";
-import frag from "./3.13.frag?raw";
+import { draw, createVertexArray, createProgram } from "../../webgl";
+import * as utils from "../../utils";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
 import { mat4 } from "gl-matrix";
 
@@ -33,10 +33,10 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   const objects = (
     await Promise.all([
-      import("../models/plane.json"),
-      import("../models/cone2.json"),
-      import("../models/sphere1.json"),
-      import("../models/sphere3.json"),
+      import("../../models/plane.json"),
+      import("../../models/cone2.json"),
+      import("../../models/sphere1.json"),
+      import("../../models/sphere3.json"),
     ])
   ).map((d, i) => ({
     ...d,

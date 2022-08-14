@@ -1,13 +1,13 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./6.12.vert?raw";
-import frag from "./6.12.frag?raw";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
-import { Scene } from "../Scene";
-import { configureControls, denormalizeColor, normalizeColor } from "../utils";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
-import { Transforms } from "../Transforms";
-import { Floor } from "../Floor";
+import { Scene } from "../../Scene";
+import { configureControls, denormalizeColor, normalizeColor } from "../../utils";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
+import { Transforms } from "../../Transforms";
+import { Floor } from "../../Floor";
 import { mat4 } from "gl-matrix";
 
 export const init = async (gl: WebGL2RenderingContext) => {
@@ -57,14 +57,14 @@ export const init = async (gl: WebGL2RenderingContext) => {
   scene.add(new Floor(80, 2));
   scene.add(
     {
-      ...(await import("../models/cone3.json")),
+      ...(await import("../../models/cone3.json")),
       diffuse: coneColor,
     },
     "cone"
   );
   scene.add(
     {
-      ...(await import("../models/sphere2.json")),
+      ...(await import("../../models/sphere2.json")),
       diffuse: sphereColor,
     },
     "sphere"

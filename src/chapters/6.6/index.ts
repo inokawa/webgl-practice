@@ -1,14 +1,14 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./6.8.vert?raw";
-import frag from "./6.8.frag?raw";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
-import { Scene } from "../Scene";
-import { configureControls } from "../utils";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
-import { Transforms } from "../Transforms";
-import { Light, LightsManager } from "../Light";
-import { Floor } from "../Floor";
+import { Scene } from "../../Scene";
+import { configureControls } from "../../utils";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
+import { Transforms } from "../../Transforms";
+import { Light, LightsManager } from "../../Light";
+import { Floor } from "../../Floor";
 import { mat4, ReadonlyVec3 } from "gl-matrix";
 
 export const init = async (gl: WebGL2RenderingContext) => {
@@ -32,7 +32,6 @@ export const init = async (gl: WebGL2RenderingContext) => {
       "uLightSource",
       "uLightAmbient",
       "uLightDiffuse",
-      "uLightDirection",
       "uMaterialAmbient",
       "uMaterialDiffuse",
       "uCutOff",
@@ -46,29 +45,32 @@ export const init = async (gl: WebGL2RenderingContext) => {
       name: "Red Light",
       position: [0, 7, 3],
       diffuse: [1, 0, 0, 1],
-      direction: [0, -2, -0.1],
     },
     {
       id: "greenLight",
       name: "Green Light",
       position: [2.5, 3, 3],
       diffuse: [0, 1, 0, 1],
-      direction: [-0.5, 1, -0.1],
     },
     {
       id: "blueLight",
       name: "Blue Light",
       position: [-2.5, 3, 3],
       diffuse: [0, 0, 1, 1],
-      direction: [0.5, 1, -0.1],
+    },
+    {
+      id: "whiteLight",
+      name: "White Light",
+      position: [0, 10, 2],
+      diffuse: [1, 1, 1, 1],
     },
   ];
 
   const scene = new Scene(gl, program);
   scene.add(new Floor(80, 2));
-  scene.add(await import("../models/wall.json"), "wall");
+  scene.add(await import("../../models/wall.json"), "wall");
   for (const { id } of lightsData) {
-    scene.add(await import("../models/sphere3.json"), id);
+    scene.add(await import("../../models/sphere3.json"), id);
   }
 
   const camera = new Camera("ORBITING_TYPE");
@@ -82,23 +84,17 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const transforms = new Transforms(program, camera, gl.canvas);
 
   const lights = new LightsManager();
-  lightsData.forEach(({ id, position, diffuse, direction }) => {
+  lightsData.forEach(({ id, position, diffuse }) => {
     const light = new Light(id);
     light.setPosition(position);
     light.setDiffuse(diffuse);
-    light.setProperty("direction", direction);
     lights.add(light);
   });
 
-  const lightCutOff = 0.75;
+  const lightCutOff = 0.5;
 
   program.use();
   program.setUniform("uLightPosition", "vec3", lights.getArray("position"));
-  program.setUniform(
-    "uLightDirection",
-    "vec3",
-    lights.getArray("direction" as any)
-  );
   program.setUniform("uLightDiffuse", "vec4", lights.getArray("diffuse"));
   program.setUniform("uCutOff", "float", lightCutOff);
   program.setUniform("uLightAmbient", "vec4", [1, 1, 1, 1]);
@@ -191,6 +187,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
       console.error(error);
     }
   });
+
   return () => {
     scene.dispose();
     disposeGui();

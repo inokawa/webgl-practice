@@ -1,14 +1,14 @@
-import { draw, createProgram } from "../webgl";
-import vert from "./4.10.vert?raw";
-import frag from "./4.10.frag?raw";
+import { draw, createProgram } from "../../webgl";
+import vert from "./shader.vert?raw";
+import frag from "./shader.frag?raw";
 
 import { mat4 } from "gl-matrix";
-import { Scene } from "../Scene";
-import { Floor } from "../Floor";
-import { Axis } from "../Axis";
-import { configureControls, range } from "../utils";
-import { Camera } from "../Camera";
-import { Controls } from "../Controls";
+import { Scene } from "../../Scene";
+import { Floor } from "../../Floor";
+import { Axis } from "../../Axis";
+import { configureControls, range } from "../../utils";
+import { Camera } from "../../Camera";
+import { Controls } from "../../Controls";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0.9, 0.9, 0.9, 1);
@@ -41,7 +41,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   const scene = new Scene(gl, program);
   const models = await Promise.all(
-    range(1, 179).map((i) => import(`../models/nissan-gtr/part${i}.json`))
+    range(1, 179).map((i) => import(`../../models/nissan-gtr/part${i}.json`))
   );
   models.forEach((m) => {
     scene.add(m);
