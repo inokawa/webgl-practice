@@ -1,4 +1,4 @@
-import{_ as v,c as x}from"./index.5d3a2ea3.js";import{c as T,d as f}from"./webgl.33373512.js";import{i as l}from"./webgl.f1d020b4.js";import{S as E}from"./Scene.04eb8002.js";import{C as d,a as U}from"./Controls.451f6f1c.js";import{T as C}from"./Transforms.c39cd1ae.js";import"./mat4.356e1817.js";const p=`#version 300 es
+import{_ as v,c as x}from"./index.31550628.js";import{c as T,d as f}from"./webgl.33373512.js";import{i as l}from"./webgl.f1d020b4.js";import{S as E}from"./Scene.3543fe1f.js";import{C as d,a as U}from"./Controls.8f2f68e2.js";import{T as C}from"./Transforms.c39cd1ae.js";import"./mat4.356e1817.js";const p=`#version 300 es
 precision mediump float;
 
 uniform bool uUseVertexColor;
