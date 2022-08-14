@@ -77,17 +77,15 @@ export const init = async (gl: WebGL2RenderingContext) => {
         program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
         program.setUniform("uMaterialAmbient", "vec4", object.ambient);
 
-        object.vao.use(() => {
-          if (object.textureCoords) {
-            texture.bind(0);
-            program.setUniform("uSampler", "sampler2D", 0);
+        if (object.textureCoords) {
+          texture.bind(0);
+          program.setUniform("uSampler", "sampler2D", 0);
 
-            texture2.bind(1);
-            program.setUniform("uNormalSampler", "sampler2D", 1);
-          }
+          texture2.bind(1);
+          program.setUniform("uNormalSampler", "sampler2D", 1);
+        }
 
-          draw(gl, object.vao, "TRIANGLES");
-        });
+        draw(gl, object.vao, "TRIANGLES");
       });
     } catch (error) {
       console.error(error);
