@@ -104,74 +104,66 @@ export const init = async (gl: WebGL2RenderingContext) => {
   });
 
   scene.start((objects) => {
-    // Checks to see if the framebuffer needs to be re-sized to match the canvas
-    post.validateSize();
+    post.drawToFramebuffer(() => {
+      gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+      gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+      transforms.updatePerspective();
+      try {
+        program.use();
+        const offscreen = program.getUniform("uOffscreen");
 
-    // Render scene to framebuffer
-    gl.bindFramebuffer(gl.FRAMEBUFFER, post.framebuffer);
+        objects.forEach((object) => {
+          transforms.calculateModelView();
+          transforms.push();
 
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-    transforms.updatePerspective();
-    try {
-      program.use();
-      const offscreen = program.getUniform("uOffscreen");
+          if (object.alias !== "floor") {
+            mat4.translate(
+              transforms.modelViewMatrix,
+              transforms.modelViewMatrix,
+              (object as any).position
+            );
+            mat4.scale(
+              transforms.modelViewMatrix,
+              transforms.modelViewMatrix,
+              (object as any).scale
+            );
+          }
 
-      objects.forEach((object) => {
-        transforms.calculateModelView();
-        transforms.push();
+          transforms.setMatrixUniforms();
+          transforms.pop();
 
-        if (object.alias !== "floor") {
-          mat4.translate(
-            transforms.modelViewMatrix,
-            transforms.modelViewMatrix,
-            (object as any).position
-          );
-          mat4.scale(
-            transforms.modelViewMatrix,
-            transforms.modelViewMatrix,
-            (object as any).scale
-          );
-        }
+          if (object.diffuse[3] < 1 && !offscreen) {
+            gl.disable(gl.DEPTH_TEST);
+            gl.enable(gl.BLEND);
+          } else {
+            gl.enable(gl.DEPTH_TEST);
+            gl.disable(gl.BLEND);
+          }
 
-        transforms.setMatrixUniforms();
-        transforms.pop();
+          program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
+          program.setUniform("uMaterialAmbient", "vec4", object.ambient);
+          program.setUniform("uUseVertexColor", "bool", false);
 
-        if (object.diffuse[3] < 1 && !offscreen) {
-          gl.disable(gl.DEPTH_TEST);
-          gl.enable(gl.BLEND);
-        } else {
-          gl.enable(gl.DEPTH_TEST);
-          gl.disable(gl.BLEND);
-        }
+          // Activate texture
+          if (object.textureCoords) {
+            object.texture?.bind(0);
+            program.setUniform("uSampler", "sampler2D", 0);
+          }
 
-        program.setUniform("uMaterialDiffuse", "vec4", object.diffuse);
-        program.setUniform("uMaterialAmbient", "vec4", object.ambient);
-        program.setUniform("uUseVertexColor", "bool", false);
+          draw(gl, object.vao, "TRIANGLES");
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    });
 
-        // Activate texture
-        if (object.textureCoords) {
-          object.texture?.bind(0);
-          program.setUniform("uSampler", "sampler2D", 0);
-        }
-
-        draw(gl, object.vao, "TRIANGLES");
-      });
-    } catch (error) {
-      console.error(error);
-    }
-
-    // Set up the post-process effect for rendering
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-    post.bind();
-
-    // Do any additional post-process shader uniform setup here
-    if (post.program.uniforms.uNoiseSampler) {
-      noiseTexture.bind(1);
-      post.program.setUniform("uNoiseSampler", "sampler2D", 1);
-    }
-
-    post.draw();
+    post.draw(() => {
+      // Do any additional post-process shader uniform setup here
+      if (post.program.uniforms.uNoiseSampler) {
+        noiseTexture.bind(1);
+        post.program.setUniform("uNoiseSampler", "sampler2D", 1);
+      }
+    });
   });
 
   return () => {

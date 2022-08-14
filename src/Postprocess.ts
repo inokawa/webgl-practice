@@ -5,7 +5,7 @@ export class PostProcess {
   private gl: WebGL2RenderingContext;
   private canvas: HTMLCanvasElement;
   private texture: WebGLTexture | null;
-  framebuffer: WebGLFramebuffer | null;
+  private framebuffer: WebGLFramebuffer | null;
   private renderbuffer: WebGLRenderbuffer | null;
   private vertexBuffer: WebGLBuffer | null;
   private textureBuffer: WebGLBuffer | null;
@@ -123,7 +123,7 @@ export class PostProcess {
     >(gl, vert, frag, [], []);
   }
 
-  validateSize() {
+  private validateSize() {
     const gl = this.gl;
     const { width, height } = this.canvas;
 
@@ -155,7 +155,22 @@ export class PostProcess {
     gl.bindRenderbuffer(gl.RENDERBUFFER, null);
   }
 
-  bind() {
+  drawToFramebuffer(fn: () => void) {
+    const gl = this.gl;
+
+    // Checks to see if the framebuffer needs to be re-sized to match the canvas
+    this.validateSize();
+
+    // Render scene to framebuffer
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+
+    fn();
+
+    // Set up the post-process effect for rendering
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  }
+
+  draw(setup: () => void) {
     const gl = this.gl;
     const { width, height } = this.canvas;
 
@@ -205,11 +220,10 @@ export class PostProcess {
         1 / height,
       ]);
     }
-  }
 
-  // Draw using TRIANGLES primitive
-  draw() {
-    const gl = this.gl;
+    setup();
+
+    // Draw using TRIANGLES primitive
     gl.drawArrays(gl.TRIANGLES, 0, 6);
   }
 
