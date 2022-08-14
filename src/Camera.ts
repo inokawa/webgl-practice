@@ -8,9 +8,9 @@ export class Camera {
   position: vec3;
   private focus: vec3;
   private home: vec3;
-  private up: vec3;
-  private right: vec3;
-  private normal: vec3;
+  up: vec3;
+  right: vec3;
+  normal: vec3;
   matrix: mat4;
   private steps: number;
   azimuth: number;

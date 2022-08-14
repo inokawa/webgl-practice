@@ -1,11 +1,12 @@
 import type { Camera } from "./Camera";
+import type { Picker } from "./Picker";
 
 // Abstraction over common controls for user interaction with a 3D scene
 export class Controls {
   private camera: Camera;
   private canvas: HTMLCanvasElement;
+  private picker: Picker | null;
 
-  //   private picking = false;
   private dragging = false;
   private ctrl = false;
   private alt = false;
@@ -23,7 +24,7 @@ export class Controls {
   constructor(camera: Camera, canvas: HTMLCanvasElement) {
     this.camera = camera;
     this.canvas = canvas;
-    // this.picker = null;
+    this.picker = null;
 
     canvas.onmousedown = (event) => this.onMouseDown(event);
     canvas.onmouseup = (event) => this.onMouseUp(event);
@@ -33,10 +34,10 @@ export class Controls {
     window.onwheel = (event) => this.onWheel(event);
   }
 
-  //   // Sets picker for picking objects
-  //   setPicker(picker) {
-  //     this.picker = picker;
-  //   }
+  // Sets picker for picking objects
+  setPicker(picker: Picker) {
+    this.picker = picker;
+  }
 
   // Returns 3D coordinates
   get2DCoords(event: MouseEvent) {
@@ -59,13 +60,14 @@ export class Controls {
     };
   }
 
-  private onMouseUp(_event: MouseEvent) {
+  private onMouseUp(event: MouseEvent) {
     this.dragging = false;
 
-    // if (!event.shiftKey && this.picker) {
-    //   this.picking = false;
-    //   this.picker.stop();
-    // }
+    if (!this.picker) return;
+    if (!event.shiftKey) {
+      this.picker.picking = false;
+      this.picker.stop();
+    }
   }
 
   private onMouseDown(event: MouseEvent) {
@@ -82,12 +84,11 @@ export class Controls {
         this.camera.position[2]
       ) / 100;
 
-    // if (!this.picker) return;
+    if (!this.picker) return;
+    const coordinates = this.get2DCoords(event);
+    this.picker.picking = !!this.picker.find(coordinates);
 
-    // const coordinates = this.get2DCoords(event);
-    // this.picking = this.picker.find(coordinates);
-
-    // if (!this.picking) this.picker.stop();
+    if (!this.picker.picking) this.picker.stop();
   }
 
   private onMouseMove(event: MouseEvent) {
@@ -105,10 +106,10 @@ export class Controls {
     const dx = this.x - this.lastX;
     const dy = this.y - this.lastY;
 
-    // if (this.picking && this.picker.moveCallback) {
-    //   this.picker.moveCallback(dx, dy);
-    //   return;
-    // }
+    if (this.picker && this.picker.picking) {
+      this.picker.callbacks.move?.(dx, dy, this.alt);
+      return;
+    }
 
     if (!this.button) {
       this.alt ? this.dolly(dy) : this.rotate(dx, dy);

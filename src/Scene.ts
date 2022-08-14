@@ -8,7 +8,7 @@ import {
   Vertex,
 } from "./webgl";
 
-type GLObject = {
+export type GLObject = {
   alias?: string;
   vertices: number[];
   indices: number[];
@@ -34,7 +34,7 @@ type GLObject = {
 export class Scene<A extends string, U extends string> {
   private gl: WebGL2RenderingContext;
   private program: Program<A, U>;
-  private objects: GLObject[];
+  objects: GLObject[];
   private stop?: () => void;
 
   constructor(gl: WebGL2RenderingContext, program: Program<A, U>) {
@@ -210,10 +210,10 @@ export class Scene<A extends string, U extends string> {
   }
 
   // Traverses over every item in the scene
-  traverse(cb: (o: GLObject, i: number) => void) {
+  traverse(cb: (o: GLObject, i: number) => boolean) {
     for (let i = 0; i < this.objects.length; i++) {
       // Break out of the loop as long as any value is returned
-      if (cb(this.objects[i], i) !== undefined) break;
+      if (cb(this.objects[i], i)) break;
     }
   }
 
