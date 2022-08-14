@@ -143,6 +143,9 @@ export const createProgram = <A extends string, U extends string>(
     },
     dispose: () => {
       gl.deleteProgram(program);
+      Object.values(attributesMap).forEach((v) => {
+        gl.disableVertexAttribArray(v as number);
+      });
     },
     getUniform: (name) => {
       return gl.getUniform(program, self.uniforms[name]);
