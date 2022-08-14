@@ -4,11 +4,11 @@ import { createProgram, Program } from "./webgl";
 export class PostProcess {
   private gl: WebGL2RenderingContext;
   private canvas: HTMLCanvasElement;
-  private texture: WebGLTexture | null;
-  private framebuffer: WebGLFramebuffer | null;
-  private renderbuffer: WebGLRenderbuffer | null;
-  private vertexBuffer: WebGLBuffer | null;
-  private textureBuffer: WebGLBuffer | null;
+  private texture: WebGLTexture;
+  private framebuffer: WebGLFramebuffer;
+  private renderbuffer: WebGLRenderbuffer;
+  private vertexBuffer: WebGLBuffer;
+  private textureBuffer: WebGLBuffer;
   program!: Program<
     "aVertexPosition" | "aVertexTextureCoords",
     "uSampler" | "uTime" | "uInverseTextureSize" | "uNoiseSampler"
@@ -17,98 +17,24 @@ export class PostProcess {
 
   constructor(gl: WebGL2RenderingContext, vert: string, frag: string) {
     this.gl = gl;
-    this.texture = null;
-    this.framebuffer = null;
-    this.renderbuffer = null;
-    this.vertexBuffer = null;
-    this.textureBuffer = null;
-
-    this.startTime = Date.now();
     this.canvas = gl.canvas;
 
-    this.configureFramebuffer();
-    this.configureGeometry();
+    const [texture, renderbuffer, framebuffer] = createFramebuffer(
+      gl,
+      this.canvas.width,
+      this.canvas.height
+    );
+    const [vertexBuffer, textureBuffer] = createGeometry(gl);
+
+    this.texture = texture;
+    this.framebuffer = framebuffer;
+    this.renderbuffer = renderbuffer;
+    this.vertexBuffer = vertexBuffer;
+    this.textureBuffer = textureBuffer;
+
+    this.startTime = Date.now();
+
     this.configureShader(vert, frag);
-  }
-
-  private configureFramebuffer() {
-    const gl = this.gl;
-    const { width, height } = this.canvas;
-
-    // Init Color Texture
-    this.texture = gl.createTexture();
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      width,
-      height,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null
-    );
-
-    // Init Renderbuffer
-    this.renderbuffer = gl.createRenderbuffer();
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
-    gl.renderbufferStorage(
-      gl.RENDERBUFFER,
-      gl.DEPTH_COMPONENT16,
-      width,
-      height
-    );
-
-    // Init Framebuffer
-    this.framebuffer = gl.createFramebuffer();
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      this.texture,
-      0
-    );
-    gl.framebufferRenderbuffer(
-      gl.FRAMEBUFFER,
-      gl.DEPTH_ATTACHMENT,
-      gl.RENDERBUFFER,
-      this.renderbuffer
-    );
-
-    // Clean up
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  }
-
-  private configureGeometry() {
-    const gl = this.gl;
-    // Define the geometry for the full-screen quad
-    const vertices = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
-
-    const textureCoords = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
-
-    // Init the buffers
-    this.vertexBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-
-    this.textureBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.textureBuffer);
-    gl.bufferData(
-      gl.ARRAY_BUFFER,
-      new Float32Array(textureCoords),
-      gl.STATIC_DRAW
-    );
-
-    // Clean up
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
   }
 
   configureShader(vert: string, frag: string) {
@@ -236,3 +162,84 @@ export class PostProcess {
     this.gl.deleteBuffer(this.textureBuffer);
   }
 }
+
+const createFramebuffer = (
+  gl: WebGL2RenderingContext,
+  width: number,
+  height: number
+): [WebGLTexture, WebGLRenderbuffer, WebGLFramebuffer] => {
+  // Init Color Texture
+  const texture = gl.createTexture()!;
+  gl.bindTexture(gl.TEXTURE_2D, texture);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texImage2D(
+    gl.TEXTURE_2D,
+    0,
+    gl.RGBA,
+    width,
+    height,
+    0,
+    gl.RGBA,
+    gl.UNSIGNED_BYTE,
+    null
+  );
+
+  // Init Renderbuffer
+  const renderbuffer = gl.createRenderbuffer()!;
+  gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+
+  // Init Framebuffer
+  const framebuffer = gl.createFramebuffer()!;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+  gl.framebufferTexture2D(
+    gl.FRAMEBUFFER,
+    gl.COLOR_ATTACHMENT0,
+    gl.TEXTURE_2D,
+    texture,
+    0
+  );
+  gl.framebufferRenderbuffer(
+    gl.FRAMEBUFFER,
+    gl.DEPTH_ATTACHMENT,
+    gl.RENDERBUFFER,
+    renderbuffer
+  );
+
+  // Clean up
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+  return [texture, renderbuffer, framebuffer];
+};
+
+const createGeometry = (
+  gl: WebGL2RenderingContext
+): [WebGLBuffer, WebGLBuffer] => {
+  // Define the geometry for the full-screen quad
+  const vertices = [-1, -1, 1, -1, -1, 1, -1, 1, 1, -1, 1, 1];
+
+  const textureCoords = [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1];
+
+  // Init the buffers
+  const vertexBuffer = gl.createBuffer()!;
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+
+  const textureBuffer = gl.createBuffer()!;
+  gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array(textureCoords),
+    gl.STATIC_DRAW
+  );
+
+  // Clean up
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+  return [vertexBuffer, textureBuffer];
+};
