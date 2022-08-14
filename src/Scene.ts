@@ -1,5 +1,12 @@
 import { calculateNormals } from "./utils";
-import { createVertexArray, Program, Vao, Vertex } from "./webgl";
+import {
+  createVertexArray,
+  loadTexture,
+  Program,
+  Texture,
+  Vao,
+  Vertex,
+} from "./webgl";
 
 type GLObject = {
   alias?: string;
@@ -20,6 +27,7 @@ type GLObject = {
   transparency: number;
   illum: number;
   vao: Vao;
+  texture?: Texture;
 };
 
 // Manages objects in a 3D scene
@@ -101,7 +109,13 @@ export class Scene<A extends string, U extends string> {
 
   // Add object to scene, by settings default and configuring all necessary
   // buffers and textures
-  add(o: Partial<GLObject>, alias?: string) {
+  add(
+    o: Partial<GLObject> & {
+      image?: string;
+    },
+    alias?: string,
+    options?: any
+  ) {
     const { gl, program } = this;
 
     // Since we've used both the OBJ convention here (e.g. Ka, Kd, Ks, etc.)
@@ -183,12 +197,13 @@ export class Scene<A extends string, U extends string> {
       transparency: o.transparency ?? d,
       illum: o.illum ?? 1,
       vao: createVertexArray(gl, program, vertexObjects, indices),
+      ...options,
     };
 
     // // Image texture
-    // if (object.image) {
-    //   object.texture = new Texture(gl, object.image);
-    // }
+    if (o.image) {
+      object.texture = loadTexture(gl, o.image);
+    }
 
     // Push to our objects list for later access
     this.objects.push(object);
@@ -264,6 +279,7 @@ export class Scene<A extends string, U extends string> {
     this.program.dispose();
     this.objects.forEach((o) => {
       o.vao.dispose();
+      o.texture?.dispose();
     });
   }
 }

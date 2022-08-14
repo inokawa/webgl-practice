@@ -102,16 +102,42 @@ export const createProgram = <A extends string, U extends string>(
   gl.deleteShader(vertShader);
   gl.deleteShader(fragShader);
 
-  const self: Program<A, U> = {
-    data: program,
-    attributes: attributes.reduce((acc, k) => {
+  let attributesMap: { [key in A]: number };
+  if (attributes.length) {
+    attributesMap = attributes.reduce((acc, k) => {
       acc[k] = gl.getAttribLocation(program, k);
       return acc;
-    }, {} as { [key in A]: number }),
-    uniforms: uniforms.reduce((acc, k) => {
+    }, {} as { [key in A]: number });
+  } else {
+    const count = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    const temp = {} as { [key in A]: number };
+    for (let i = 0; i < count; i++) {
+      const attrib = gl.getActiveAttrib(program, i)!;
+      temp[attrib.name as A] = gl.getAttribLocation(program, attrib.name)!;
+    }
+    attributesMap = temp;
+  }
+
+  let uniformsMap: { [key in U]: WebGLUniformLocation };
+  if (uniforms.length) {
+    uniformsMap = uniforms.reduce((acc, k) => {
       acc[k] = gl.getUniformLocation(program, k)!;
       return acc;
-    }, {} as { [key in U]: WebGLUniformLocation }),
+    }, {} as { [key in U]: WebGLUniformLocation });
+  } else {
+    const count = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+    const temp = {} as { [key in U]: WebGLUniformLocation };
+    for (let i = 0; i < count; i++) {
+      const uniform = gl.getActiveUniform(program, i)!;
+      temp[uniform.name as U] = gl.getUniformLocation(program, uniform.name)!;
+    }
+    uniformsMap = temp;
+  }
+
+  const self: Program<A, U> = {
+    data: program,
+    attributes: attributesMap,
+    uniforms: uniformsMap,
     use: () => {
       gl.useProgram(program);
     },
@@ -265,7 +291,17 @@ export const draw = (
   });
 };
 
-export const loadTexture = (gl: WebGL2RenderingContext, url: string) => {
+export type Texture = {
+  use: (fn: () => void) => void;
+  set: (newUrl: string) => void;
+  bind: (i: 0 | 1 | 2) => void;
+  dispose: () => void;
+};
+
+export const loadTexture = (
+  gl: WebGL2RenderingContext,
+  url: string
+): Texture => {
   const texture = gl.createTexture();
   const image = new Image();
   image.onload = () => {
@@ -283,15 +319,15 @@ export const loadTexture = (gl: WebGL2RenderingContext, url: string) => {
   image.src = url;
 
   return {
-    use(fn: () => void) {
+    use(fn) {
       gl.bindTexture(gl.TEXTURE_2D, texture);
       fn();
       gl.bindTexture(gl.TEXTURE_2D, null);
     },
-    set(newUrl: string) {
+    set(newUrl) {
       image.src = newUrl;
     },
-    bind(i: 0 | 1 | 2) {
+    bind(i) {
       gl.activeTexture(gl[`TEXTURE${i}`]);
       gl.bindTexture(gl.TEXTURE_2D, texture);
     },

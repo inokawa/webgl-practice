@@ -46,6 +46,7 @@ window.onload = async () => {
     ["7.7", () => import("./chapters/7.7")],
     ["7.9", () => import("./chapters/7.9")],
     ["7.11", () => import("./chapters/7.11")],
+    ["10.3", () => import("./chapters/10.3")],
   ];
   menus.forEach(([name, data]) => {
     appendMenu(menuEl, name, async () => {

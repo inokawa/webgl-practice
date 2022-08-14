@@ -38,14 +38,12 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   const scene = new Scene(gl, program);
 
-  scene.add(
-    { ...(await import("../../models/cube-simple.json")), hidden: false } as any,
-    "simpleCube"
-  );
-  scene.add(
-    { ...(await import("../../models/cube-complex.json")), hidden: true } as any,
-    "complexCube"
-  );
+  scene.add(await import("../../models/cube-simple.json"), "simpleCube", {
+    hidden: false,
+  });
+  scene.add(await import("../../models/cube-complex.json"), "complexCube", {
+    hidden: false,
+  });
 
   const camera = new Camera("ORBITING_TYPE");
   camera.goHome([0, 0, 3]);
