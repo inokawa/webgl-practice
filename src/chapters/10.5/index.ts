@@ -8,6 +8,7 @@ import { configureControls } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
+import { Particles } from "../../Particles";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0.1, 0.1, 0.1, 1.0);
@@ -40,14 +41,10 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   const spriteTexture = loadTexture(gl, imgUrl);
 
-  let particleSize = 14,
-    particleLifespan = 3;
+  let particleSize = 14;
   const count = 1024;
-  const [particles, particleArray] = configureParticles(count);
-  const particleBuffer = gl.createBuffer()!;
-  gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, particleArray, gl.STATIC_DRAW);
-  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  const lifeSpan = 3;
+  const particles = new Particles(gl, count, lifeSpan);
 
   program.use();
 
@@ -60,11 +57,11 @@ export const init = async (gl: WebGL2RenderingContext) => {
       onChange: (v) => (particleSize = v),
     },
     "Particle Life Span": {
-      value: particleLifespan,
+      value: lifeSpan,
       min: 1,
       max: 10,
       step: 0.1,
-      onChange: (v) => (particleLifespan = v),
+      onChange: (v) => particles.updateLifespan(v),
     },
   });
 
@@ -75,13 +72,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
     // Update the particle positions
     const now = Date.now();
-    updateParticles((now - lastFrameTime) / 1000.0);
+    particles.updateParticles((now - lastFrameTime) / 1000.0);
     lastFrameTime = now;
-
-    // Once we are done looping through all the particles, update the buffer once
-    gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, particleArray, gl.STATIC_DRAW);
-    gl.bindBuffer(gl.ARRAY_BUFFER, null);
 
     try {
       transforms.calculateModelView();
@@ -94,26 +86,24 @@ export const init = async (gl: WebGL2RenderingContext) => {
       transforms.calculateModelView();
       transforms.push();
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, particleBuffer);
-      gl.vertexAttribPointer(
-        program.attributes.aParticle,
-        4,
-        gl.FLOAT,
-        false,
-        0,
-        0
-      );
-      gl.enableVertexAttribArray(program.attributes.aParticle);
+      particles.use((count) => {
+        gl.vertexAttribPointer(
+          program.attributes.aParticle,
+          4,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+        gl.enableVertexAttribArray(program.attributes.aParticle);
 
-      // Activate texture
-      spriteTexture.bind(0);
-      program.setUniform("uSampler", "sampler2D", 0);
+        // Activate texture
+        spriteTexture.bind(0);
+        program.setUniform("uSampler", "sampler2D", 0);
 
-      // Draw
-      gl.drawArrays(gl.POINTS, 0, particles.length);
-
-      // Clean
-      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        // Draw
+        gl.drawArrays(gl.POINTS, 0, count);
+      });
     } catch (error) {
       console.error(error);
     }
@@ -121,83 +111,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   return () => {
     scene.dispose();
-    gl.deleteBuffer(particleBuffer);
+    particles.dispose();
     disposeGui();
     spriteTexture.dispose();
   };
-
-  type Particle = {
-    position: [number, number, number];
-    velocity: [number, number, number];
-    lifespan: number;
-    remainingLife: number;
-  };
-
-  function createParticle(): Particle {
-    const lifeSpan = Math.random() * particleLifespan;
-    return {
-      position: [0, 0, 0],
-      velocity: [
-        Math.random() * 20 - 10,
-        Math.random() * 20,
-        Math.random() * 20 - 10,
-      ],
-      lifespan: lifeSpan,
-      remainingLife: lifeSpan,
-    };
-  }
-
-  function configureParticles(count: number): [Particle[], Float32Array] {
-    const particles: Particle[] = [];
-    const particleArray = new Float32Array(count * 4);
-
-    for (let i = 0; i < count; ++i) {
-      const particle = createParticle();
-      particles.push(particle);
-
-      const index = i * 4;
-      particleArray[index] = particle.position[0];
-      particleArray[index + 1] = particle.position[1];
-      particleArray[index + 2] = particle.position[2];
-      particleArray[index + 3] = particle.remainingLife / particle.lifespan;
-    }
-
-    return [particles, particleArray];
-  }
-
-  function updateParticles(elapsed: number) {
-    // Loop through all the particles in the array
-    particles.forEach((particle, i) => {
-      // Track the particles lifespan
-      particle.remainingLife -= elapsed;
-
-      if (particle.remainingLife <= 0) {
-        // Once the particle expires, reset it to the origin with a new velocity
-        Object.entries(createParticle()).forEach(([k, v]) => {
-          (particle as any)[k] = v;
-        });
-      }
-
-      // Update the particle position
-      particle.position[0] += particle.velocity[0] * elapsed;
-      particle.position[1] += particle.velocity[1] * elapsed;
-      particle.position[2] += particle.velocity[2] * elapsed;
-
-      // Apply gravity to the velocity
-      particle.velocity[1] -= 9.8 * elapsed;
-
-      if (particle.position[1] < 0) {
-        // Allow particles to bounce off the floor
-        particle.velocity[1] *= -0.75;
-        particle.position[1] = 0;
-      }
-
-      // Update the corresponding values in the array
-      const index = i * 4;
-      particleArray[index] = particle.position[0];
-      particleArray[index + 1] = particle.position[1];
-      particleArray[index + 2] = particle.position[2];
-      particleArray[index + 3] = particle.remainingLife / particle.lifespan;
-    });
-  }
 };
