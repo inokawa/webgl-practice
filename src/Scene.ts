@@ -1,4 +1,4 @@
-import { calculateNormals } from "./utils";
+import { calculateNormals, calculateTangents } from "./utils";
 import {
   createVertexArray,
   loadTexture,
@@ -169,13 +169,13 @@ export class Scene<A extends string, U extends string> {
         data: textureCoords,
         size: 2,
       });
-      // if ("aVertexTangent" in program.attributes) {
-      //   vertexObjects.push({
-      //     name: "aVertexTangent",
-      //     data: calculateTangents(vertices, textureCoords, indices),
-      //     size: 3,
-      //   });
-      // }
+      if ("aVertexTangent" in program.attributes) {
+        vertexObjects.push({
+          name: "aVertexTangent",
+          data: calculateTangents(vertices, textureCoords, indices),
+          size: 3,
+        });
+      }
     }
 
     const object: GLObject = {
