@@ -1,4 +1,4 @@
-import{c as s}from"./webgl.0c8613b1.js";import{S as c}from"./Scene.d4b40815.js";import{P as a}from"./PostProcess.53dfdf36.js";import"./index.33a747f3.js";const r=`#version 300 es
+import{c as s}from"./webgl.0c8613b1.js";import{S as c}from"./Scene.5278479c.js";import{P as a}from"./PostProcess.53dfdf36.js";import"./index.f28f68ca.js";const t=`#version 300 es
 precision mediump float;
 
 in vec2 aVertexPosition;
@@ -9,7 +9,7 @@ out vec2 vTextureCoords;
 void main(void) {
   vTextureCoords = aVertexTextureCoords;
   gl_Position = vec4(aVertexPosition, 0.0, 1.0);
-}`,i=`#version 300 es
+}`,r=`#version 300 es
 precision mediump float;
 
 uniform float uTime;
@@ -101,4 +101,4 @@ void main(void) {
     }
 
     fragColor = vec4(rayColor, 1.0);
-}`,f=async e=>{e.clearColor(.2,.2,.2,1),e.clearDepth(100),e.enable(e.DEPTH_TEST),e.depthFunc(e.LESS),e.blendFunc(e.SRC_ALPHA,e.ONE_MINUS_SRC_ALPHA);const n=s(e,r,i,[],[]),o=new c(e,n),t=new a(e,r,i);return n.use(),o.start(()=>{t.draw()}),()=>{o.dispose(),t.dispose()}};export{f as init};
+}`,f=async e=>{e.clearColor(.2,.2,.2,1),e.clearDepth(100),e.enable(e.DEPTH_TEST),e.depthFunc(e.LESS),e.blendFunc(e.SRC_ALPHA,e.ONE_MINUS_SRC_ALPHA);const i=s(e,t,r,[],[]),n=new c(e,i),o=new a(e,t,r);return n.start(()=>{o.draw()}),()=>{n.dispose(),o.dispose()}};export{f as init};
