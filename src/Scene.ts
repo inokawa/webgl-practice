@@ -10,6 +10,7 @@ import {
 
 export type GLObject = {
   alias?: string;
+  visible?: boolean;
   vertices: number[];
   indices: number[];
   scalars: number[];
@@ -180,6 +181,7 @@ export class Scene<A extends string, U extends string> {
 
     const object: GLObject = {
       alias: o.alias ?? alias,
+      visible: o.visible ?? true,
       vertices,
       indices,
       scalars,
