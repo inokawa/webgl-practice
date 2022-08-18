@@ -1,5 +1,10 @@
 import { draw, createVertexArray, createProgram } from "../../webgl";
-import * as utils from "../../utils";
+import {
+  calculateNormals,
+  configureControls,
+  loadJSON,
+  normalizeColor,
+} from "../../utils";
 import vert from "./shader.vert?raw";
 import frag from "./shader.frag?raw";
 
@@ -33,10 +38,10 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   const objects = (
     await Promise.all([
-      import("../../models/plane.json"),
-      import("../../models/cone2.json"),
-      import("../../models/sphere1.json"),
-      import("../../models/sphere3.json"),
+      loadJSON("/models/plane.json"),
+      loadJSON("/models/cone2.json"),
+      loadJSON("/models/sphere1.json"),
+      loadJSON("/models/sphere3.json"),
     ])
   ).map((d, i) => ({
     ...d,
@@ -48,7 +53,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
         { name: "aVertexPosition", data: d.vertices, size: 3 },
         {
           name: "aVertexNormal",
-          data: utils.calculateNormals(d.vertices, d.indices),
+          data: calculateNormals(d.vertices, d.indices),
           size: 3,
         },
       ],
@@ -67,16 +72,16 @@ export const init = async (gl: WebGL2RenderingContext) => {
   function getObject(alias: string) {
     return objects.find((object) => object.alias === alias);
   }
-  const disposeGui = utils.configureControls({
+  const disposeGui = configureControls({
     "Sphere Color": {
       value: [0, 255, 0],
       onChange: (v) =>
-        (getObject("sphere")!.diffuse = [...utils.normalizeColor(v), 1.0]),
+        (getObject("sphere")!.diffuse = [...normalizeColor(v), 1.0]),
     },
     "Cone Color": {
       value: [235, 0, 210],
       onChange: (v) =>
-        (getObject("cone")!.diffuse = [...utils.normalizeColor(v), 1.0]),
+        (getObject("cone")!.diffuse = [...normalizeColor(v), 1.0]),
     },
     Shininess: {
       value: shininess,

@@ -4,7 +4,7 @@ import frag from "./shader.frag?raw";
 
 import { Scene } from "../../Scene";
 import { Floor } from "../../Floor";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -65,27 +65,27 @@ export const init = async (gl: WebGL2RenderingContext) => {
   scene.add(new Floor(zDimension, 2));
   scene.add(new Axis(zDimension));
   scene.add(
-    { ...(await import("../../models/ball.json")), diffuse: ballColor },
+    { ...(await loadJSON("/models/ball.json")), diffuse: ballColor },
     "ball"
   );
   scene.add(
-    { ...(await import("../../models/flag.json")), diffuse: flagStartColor },
+    { ...(await loadJSON("/models/flag.json")), diffuse: flagStartColor },
     "flagStart"
   );
   scene.add(
-    { ...(await import("../../models/flag.json")), diffuse: flagEndColor },
+    { ...(await loadJSON("/models/flag.json")), diffuse: flagEndColor },
     "flagEnd"
   );
   scene.add(
-    { ...(await import("../../models/flag.json")), diffuse: flagColor },
+    { ...(await loadJSON("/models/flag.json")), diffuse: flagColor },
     "flag1"
   );
   scene.add(
-    { ...(await import("../../models/flag.json")), diffuse: flagColor },
+    { ...(await loadJSON("/models/flag.json")), diffuse: flagColor },
     "flag2"
   );
   scene.add(
-    { ...(await import("../../models/flag.json")), diffuse: flagColor },
+    { ...(await loadJSON("/models/flag.json")), diffuse: flagColor },
     "flag3"
   );
 

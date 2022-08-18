@@ -3,7 +3,7 @@ import vert from "./shader.vert?raw";
 import frag from "./shader.frag?raw";
 
 import { Scene } from "../../Scene";
-import { configureControls, normalizeColor } from "../../utils";
+import { configureControls, loadJSON, normalizeColor } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -49,7 +49,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../../models/cube-complex.json"), "cube");
+  scene.add(await loadJSON("/models/cube-complex.json"), "cube");
 
   const camera = new Camera("ORBITING_TYPE");
   camera.goHome([0, 0, 4]);

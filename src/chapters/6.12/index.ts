@@ -3,7 +3,7 @@ import vert from "./shader.vert?raw";
 import frag from "./shader.frag?raw";
 
 import { Scene } from "../../Scene";
-import { configureControls, denormalizeColor, normalizeColor } from "../../utils";
+import { configureControls, denormalizeColor, loadJSON, normalizeColor } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -57,14 +57,14 @@ export const init = async (gl: WebGL2RenderingContext) => {
   scene.add(new Floor(80, 2));
   scene.add(
     {
-      ...(await import("../../models/cone3.json")),
+      ...(await loadJSON("/models/cone3.json")),
       diffuse: coneColor,
     },
     "cone"
   );
   scene.add(
     {
-      ...(await import("../../models/sphere2.json")),
+      ...(await loadJSON("/models/sphere2.json")),
       diffuse: sphereColor,
     },
     "sphere"

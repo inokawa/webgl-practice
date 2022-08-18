@@ -6,6 +6,7 @@ import { Scene, GLObject } from "../../Scene";
 import {
   configureControls,
   denormalizeColor,
+  loadJSON,
   normalizeColor,
   range,
 } from "../../utils";
@@ -86,25 +87,25 @@ export const init = async (gl: WebGL2RenderingContext) => {
       // aliases that were set by the 3D artists.
       paintAlias: "BMW",
       parts: range(1, 25).map(
-        (i) => () => import(`../../models/bmw-i8/part${i}.json`)
+        (i) => () => loadJSON(`/models/bmw-i8/part${i}.json`)
       ),
     },
     "Audi R8": {
       paintAlias: "Lack",
       parts: range(1, 150).map(
-        (i) => () => import(`../../models/audi-r8/part${i}.json`)
+        (i) => () => loadJSON(`/models/audi-r8/part${i}.json`)
       ),
     },
     "Ford Mustang": {
       paintAlias: "pintura_carro",
       parts: range(1, 103).map(
-        (i) => () => import(`../../models/ford-mustang/part${i}.json`)
+        (i) => () => loadJSON(`/models/ford-mustang/part${i}.json`)
       ),
     },
     "Lamborghini Gallardo": {
       paintAlias: "Yellow",
       parts: range(1, 66).map(
-        (i) => () => import(`../../models/lamborghini-gallardo/part${i}.json`)
+        (i) => () => loadJSON(`/models/lamborghini-gallardo/part${i}.json`)
       ),
     },
   } as const;

@@ -3,7 +3,7 @@ import vert from "./shader.vert?raw";
 import frag from "./shader.frag?raw";
 
 import { Scene } from "../../Scene";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -55,14 +55,14 @@ export const init = async (gl: WebGL2RenderingContext) => {
       switch (objectType) {
         case 1:
           scene.add(
-            await import("../../models/sphere1.json"),
+            await loadJSON("/models/sphere1.json"),
             `ball_${i}`,
             options
           );
           break;
         case 0:
           scene.add(
-            await import("../../models/cylinder.json"),
+            await loadJSON("/models/cylinder.json"),
             `cylinder_${i}`,
             options
           );

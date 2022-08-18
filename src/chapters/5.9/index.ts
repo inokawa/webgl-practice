@@ -4,7 +4,7 @@ import frag from "./shader.frag?raw";
 
 import { Scene } from "../../Scene";
 import { Floor } from "../../Floor";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -52,7 +52,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const ballsCount = 500;
   const balls: BouncingBall[] = [];
   scene.add(new Floor(80, 2));
-  scene.add(await import("../../models/ball.json"), "ball");
+  scene.add(await loadJSON("/models/ball.json"), "ball");
   // Load the number of balls into our scene
   for (let i = 0; i < ballsCount; i++) {
     balls.push(new BouncingBall(gravity));

@@ -3,7 +3,7 @@ import vert from "./shader.vert?raw";
 import frag from "./shader.frag?raw";
 
 import { Scene } from "../../Scene";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -66,9 +66,9 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   const scene = new Scene(gl, program);
   scene.add(new Floor(80, 2));
-  scene.add(await import("../../models/wall.json"), "wall");
+  scene.add(await loadJSON("/models/wall.json"), "wall");
   for (const { id } of lightsData) {
-    scene.add(await import("../../models/sphere3.json"), id);
+    scene.add(await loadJSON("/models/sphere3.json"), id);
   }
 
   const camera = new Camera("ORBITING_TYPE");

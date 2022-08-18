@@ -7,7 +7,7 @@ import imgUrl from "../../images/webgl.gif";
 import noiseImgUrl from "../../images/noise.png";
 
 import { Scene } from "../../Scene";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -50,7 +50,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   const scene = new Scene(gl, program);
   scene.add(
     {
-      ...(await import("../../models/cube-texture.json")),
+      ...(await loadJSON("/models/cube-texture.json")),
       image: imgUrl,
     },
     "cube",

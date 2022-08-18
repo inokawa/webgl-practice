@@ -6,7 +6,7 @@ import { mat4 } from "gl-matrix";
 import { Scene } from "../../Scene";
 import { Floor } from "../../Floor";
 import { Axis } from "../../Axis";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -53,8 +53,8 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   scene.add(new Floor(80, 2));
   scene.add(new Axis(82));
-  scene.add(await import("../../models/sphere2.json"), "sphere");
-  scene.add(await import("../../models/cone3.json"), "cone");
+  scene.add(await loadJSON("/models/sphere2.json"), "sphere");
+  scene.add(await loadJSON("/models/cone3.json"), "cone");
 
   const camera = new Camera("ORBITING_TYPE");
   camera.goHome([0, 2, 50]);

@@ -3,7 +3,7 @@ import vert from "./shader.vert?raw";
 import frag from "./shader.frag?raw";
 
 import { Scene } from "../../Scene";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -38,10 +38,10 @@ export const init = async (gl: WebGL2RenderingContext) => {
 
   const scene = new Scene(gl, program);
 
-  scene.add(await import("../../models/cube-simple.json"), "simpleCube", {
+  scene.add(await loadJSON("/models/cube-simple.json"), "simpleCube", {
     hidden: false,
   });
-  scene.add(await import("../../models/cube-complex.json"), "complexCube", {
+  scene.add(await loadJSON("/models/cube-complex.json"), "complexCube", {
     hidden: false,
   });
 

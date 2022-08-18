@@ -12,6 +12,13 @@ export const range = (start: number, end?: number): number[] => {
   return Array.from({ length: length }, (_, i) => i + start);
 };
 
+export const loadJSON = (path: string) => {
+  if (process.env.BASEPATH) {
+    path = process.env.BASEPATH + path;
+  }
+  return fetch(path).then((res) => res.json());
+};
+
 // Find and return a DOM element given an ID
 export const getCanvas = (id: string): HTMLCanvasElement | null => {
   const canvas = document.getElementById(id);

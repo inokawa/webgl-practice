@@ -6,7 +6,7 @@ import { mat4, vec3 } from "gl-matrix";
 import { Scene } from "../../Scene";
 import { Floor } from "../../Floor";
 import { Axis } from "../../Axis";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 
 export const init = async (gl: WebGL2RenderingContext) => {
   gl.clearColor(0.9, 0.9, 0.9, 1);
@@ -44,7 +44,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../../models/cone3.json"), "cone");
+  scene.add(await loadJSON("/models/cone3.json"), "cone");
   scene.add(new Floor());
   scene.add(new Axis());
 

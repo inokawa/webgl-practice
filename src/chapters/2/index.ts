@@ -1,5 +1,5 @@
 import { draw, createVertexArray, createProgram } from "../../webgl";
-import * as utils from "../../utils";
+import { range, loadJSON } from "../../utils";
 import vert from "./shader.vert?raw";
 import frag from "./shader.frag?raw";
 
@@ -18,18 +18,16 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const models = await Promise.all(
-    utils
-      .range(1, 179)
-      .map((i) =>
-        import(`../../models/nissan-gtr/part${i}.json`).then((model) =>
-          createVertexArray(
-            gl,
-            program,
-            [{ name: "aVertexPosition", data: model.vertices, size: 3 }],
-            model.indices
-          )
+    range(1, 179).map((i) =>
+      loadJSON(`/models/nissan-gtr/part${i}.json`).then((model) =>
+        createVertexArray(
+          gl,
+          program,
+          [{ name: "aVertexPosition", data: model.vertices, size: 3 }],
+          model.indices
         )
       )
+    )
   );
 
   const projectionMatrix = mat4.create();

@@ -4,7 +4,7 @@ import frag from "./shader.frag?raw";
 import imgUrl from "../../images/webgl.png";
 
 import { Scene } from "../../Scene";
-import { configureControls } from "../../utils";
+import { configureControls, loadJSON } from "../../utils";
 import { Camera } from "../../Camera";
 import { Controls } from "../../Controls";
 import { Transforms } from "../../Transforms";
@@ -48,7 +48,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   );
 
   const scene = new Scene(gl, program);
-  scene.add(await import("../../models/cube-texture.json"));
+  scene.add(await loadJSON("/models/cube-texture.json"));
 
   const camera = new Camera("ORBITING_TYPE");
   camera.goHome([0, 0, 4]);
