@@ -1,4 +1,5 @@
 import type { GLObject, Scene } from "./Scene";
+import { createFramebuffer, FrameBuffer } from "./webgl";
 
 type Callbacks = Readonly<{
   hitProperty?: (o: GLObject) => [number, number, number];
@@ -13,9 +14,7 @@ export class Picker {
   private gl: WebGL2RenderingContext;
   private canvas: HTMLCanvasElement;
   private scene: Scene<any, any>;
-  private framebuffer: WebGLFramebuffer;
-  private renderbuffer: WebGLRenderbuffer;
-  private texture: WebGLTexture;
+  private framebuffer: FrameBuffer;
   private pickedList: GLObject[];
   callbacks: Callbacks;
   picking = false;
@@ -34,8 +33,8 @@ export class Picker {
 
     const { width, height } = this.canvas;
 
-    this.texture = gl.createTexture()!;
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    const texture = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, texture);
     gl.texImage2D(
       gl.TEXTURE_2D,
       0,
@@ -48,44 +47,11 @@ export class Picker {
       null
     );
 
-    this.renderbuffer = gl.createRenderbuffer()!;
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
-    gl.renderbufferStorage(
-      gl.RENDERBUFFER,
-      gl.DEPTH_COMPONENT16,
-      width,
-      height
-    );
-
-    this.framebuffer = gl.createFramebuffer()!;
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.framebufferTexture2D(
-      gl.FRAMEBUFFER,
-      gl.COLOR_ATTACHMENT0,
-      gl.TEXTURE_2D,
-      this.texture,
-      0
-    );
-    gl.framebufferRenderbuffer(
-      gl.FRAMEBUFFER,
-      gl.DEPTH_ATTACHMENT,
-      gl.RENDERBUFFER,
-      this.renderbuffer
-    );
-
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.framebuffer = createFramebuffer(gl, width, height, texture);
   }
 
   drawToFramebuffer(fn: () => void) {
-    const gl = this.gl;
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-
-    fn();
-
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.framebuffer.use(fn);
   }
 
   getHits() {
@@ -93,29 +59,9 @@ export class Picker {
   }
 
   update() {
-    const gl = this.gl;
     const { width, height } = this.canvas;
 
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      width,
-      height,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null
-    );
-
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
-    gl.renderbufferStorage(
-      gl.RENDERBUFFER,
-      gl.DEPTH_COMPONENT16,
-      width,
-      height
-    );
+    this.framebuffer.resize(width, height);
   }
 
   // Compare whether the pixel matches the readout
@@ -133,10 +79,17 @@ export class Picker {
   find(coords: { x: number; y: number }) {
     const gl = this.gl;
     const readout = new Uint8Array(4);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-    gl.readPixels(coords.x, coords.y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, readout);
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
+    this.framebuffer.use(() => {
+      gl.readPixels(
+        coords.x,
+        coords.y,
+        1,
+        1,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        readout
+      );
+    });
     let found = false;
 
     this.scene.traverse((obj) => {
@@ -166,5 +119,9 @@ export class Picker {
       this.callbacks.processHits?.(this.pickedList);
     }
     this.pickedList = [];
+  }
+
+  dispose() {
+    this.framebuffer.dispose();
   }
 }

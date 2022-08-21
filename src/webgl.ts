@@ -339,3 +339,90 @@ export const loadTexture = (
     },
   };
 };
+
+export type FrameBuffer = {
+  buffer: WebGLFramebuffer;
+  texture: WebGLTexture;
+  use: (fn: () => void) => void;
+  resize: (width: number, height: number) => void;
+  dispose: () => void;
+};
+
+export const createFramebuffer = (
+  gl: WebGL2RenderingContext,
+  width: number,
+  height: number,
+  texture: WebGLTexture
+): FrameBuffer => {
+  // Init Renderbuffer
+  const renderbuffer = gl.createRenderbuffer()!;
+  gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
+
+  // Init Framebuffer
+  const framebuffer = gl.createFramebuffer()!;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+  gl.framebufferTexture2D(
+    gl.FRAMEBUFFER,
+    gl.COLOR_ATTACHMENT0,
+    gl.TEXTURE_2D,
+    texture,
+    0
+  );
+  gl.framebufferRenderbuffer(
+    gl.FRAMEBUFFER,
+    gl.DEPTH_ATTACHMENT,
+    gl.RENDERBUFFER,
+    renderbuffer
+  );
+
+  // Clean up
+  gl.bindTexture(gl.TEXTURE_2D, null);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+  return {
+    buffer: framebuffer,
+    texture,
+    use: (fn: () => void) => {
+      // Render scene to framebuffer
+      gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+      fn();
+      // Set up the post-process effect for rendering
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    },
+    resize: (width, height) => {
+      // 1. Resize Color Texture
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        width,
+        height,
+        0,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        null
+      );
+
+      // 2. Resize Render Buffer
+      gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
+      gl.renderbufferStorage(
+        gl.RENDERBUFFER,
+        gl.DEPTH_COMPONENT16,
+        width,
+        height
+      );
+
+      // 3. Clean up
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    },
+    dispose: () => {
+      gl.deleteTexture(texture);
+      gl.deleteFramebuffer(framebuffer);
+      gl.deleteRenderbuffer(renderbuffer);
+    },
+  };
+};

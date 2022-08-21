@@ -219,6 +219,7 @@ export const init = async (gl: WebGL2RenderingContext) => {
   return () => {
     scene.dispose();
     disposeGui();
+    picker.dispose();
   };
 };
 

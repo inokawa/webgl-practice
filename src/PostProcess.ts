@@ -1,12 +1,15 @@
-import { createProgram, Program } from "./webgl";
+import {
+  createFramebuffer,
+  createProgram,
+  FrameBuffer,
+  Program,
+} from "./webgl";
 
 // Simple implementation for post-processing effects
 export class PostProcess {
   private gl: WebGL2RenderingContext;
   private canvas: HTMLCanvasElement;
-  private texture: WebGLTexture;
-  private framebuffer: WebGLFramebuffer;
-  private renderbuffer: WebGLRenderbuffer;
+  private framebuffer: FrameBuffer;
   private vertexBuffer: WebGLBuffer;
   private textureBuffer: WebGLBuffer;
   program!: Program<
@@ -19,16 +22,32 @@ export class PostProcess {
     this.gl = gl;
     this.canvas = gl.canvas;
 
-    const [texture, renderbuffer, framebuffer] = createFramebuffer(
-      gl,
-      this.canvas.width,
-      this.canvas.height
+    const width = this.canvas.width;
+    const height = this.canvas.height;
+
+    // Init Color Texture
+    const texture = gl.createTexture()!;
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.texImage2D(
+      gl.TEXTURE_2D,
+      0,
+      gl.RGBA,
+      width,
+      height,
+      0,
+      gl.RGBA,
+      gl.UNSIGNED_BYTE,
+      null
     );
+
+    const framebuffer = createFramebuffer(gl, width, height, texture);
     const [vertexBuffer, textureBuffer] = createGeometry(gl);
 
-    this.texture = texture;
     this.framebuffer = framebuffer;
-    this.renderbuffer = renderbuffer;
     this.vertexBuffer = vertexBuffer;
     this.textureBuffer = textureBuffer;
 
@@ -50,50 +69,16 @@ export class PostProcess {
   }
 
   private validateSize() {
-    const gl = this.gl;
     const { width, height } = this.canvas;
 
-    // 1. Resize Color Texture
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
-    gl.texImage2D(
-      gl.TEXTURE_2D,
-      0,
-      gl.RGBA,
-      width,
-      height,
-      0,
-      gl.RGBA,
-      gl.UNSIGNED_BYTE,
-      null
-    );
-
-    // 2. Resize Render Buffer
-    gl.bindRenderbuffer(gl.RENDERBUFFER, this.renderbuffer);
-    gl.renderbufferStorage(
-      gl.RENDERBUFFER,
-      gl.DEPTH_COMPONENT16,
-      width,
-      height
-    );
-
-    // 3. Clean up
-    gl.bindTexture(gl.TEXTURE_2D, null);
-    gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+    this.framebuffer.resize(width, height);
   }
 
   drawToFramebuffer(fn: () => void) {
-    const gl = this.gl;
-
     // Checks to see if the framebuffer needs to be re-sized to match the canvas
     this.validateSize();
 
-    // Render scene to framebuffer
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
-
-    fn();
-
-    // Set up the post-process effect for rendering
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    this.framebuffer.use(fn);
   }
 
   draw(setup?: () => void) {
@@ -127,7 +112,7 @@ export class PostProcess {
 
     // Bind the texture from the framebuffer
     gl.activeTexture(gl.TEXTURE0);
-    gl.bindTexture(gl.TEXTURE_2D, this.texture);
+    gl.bindTexture(gl.TEXTURE_2D, this.framebuffer.texture);
     this.program.setUniform("uSampler", "sampler2D", 0);
 
     // If the post process shader uses time as an input, pass it in here
@@ -155,67 +140,11 @@ export class PostProcess {
 
   dispose() {
     this.program.dispose();
-    this.gl.deleteTexture(this.texture);
-    this.gl.deleteFramebuffer(this.framebuffer);
-    this.gl.deleteRenderbuffer(this.renderbuffer);
+    this.framebuffer.dispose();
     this.gl.deleteBuffer(this.vertexBuffer);
     this.gl.deleteBuffer(this.textureBuffer);
   }
 }
-
-const createFramebuffer = (
-  gl: WebGL2RenderingContext,
-  width: number,
-  height: number
-): [WebGLTexture, WebGLRenderbuffer, WebGLFramebuffer] => {
-  // Init Color Texture
-  const texture = gl.createTexture()!;
-  gl.bindTexture(gl.TEXTURE_2D, texture);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-  gl.texImage2D(
-    gl.TEXTURE_2D,
-    0,
-    gl.RGBA,
-    width,
-    height,
-    0,
-    gl.RGBA,
-    gl.UNSIGNED_BYTE,
-    null
-  );
-
-  // Init Renderbuffer
-  const renderbuffer = gl.createRenderbuffer()!;
-  gl.bindRenderbuffer(gl.RENDERBUFFER, renderbuffer);
-  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, width, height);
-
-  // Init Framebuffer
-  const framebuffer = gl.createFramebuffer()!;
-  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
-  gl.framebufferTexture2D(
-    gl.FRAMEBUFFER,
-    gl.COLOR_ATTACHMENT0,
-    gl.TEXTURE_2D,
-    texture,
-    0
-  );
-  gl.framebufferRenderbuffer(
-    gl.FRAMEBUFFER,
-    gl.DEPTH_ATTACHMENT,
-    gl.RENDERBUFFER,
-    renderbuffer
-  );
-
-  // Clean up
-  gl.bindTexture(gl.TEXTURE_2D, null);
-  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-  return [texture, renderbuffer, framebuffer];
-};
 
 const createGeometry = (
   gl: WebGL2RenderingContext
