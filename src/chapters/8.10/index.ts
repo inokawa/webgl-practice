@@ -152,18 +152,17 @@ export const init = async (gl: WebGL2RenderingContext) => {
   scene.start((objects) => {
     picker.drawToFramebuffer(() => {
       program.setUniform("uOffscreen", "bool", true);
-      render();
-      program.setUniform("uOffscreen", "bool", showPickingImage);
+      render(true);
     });
-    render();
+    program.setUniform("uOffscreen", "bool", showPickingImage);
+    render(showPickingImage);
 
-    function render() {
+    function render(offscreen: boolean) {
       gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
       gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
       transforms.updatePerspective();
 
       try {
-        const offscreen = program.getUniform("uOffscreen");
         const flatShadingMode = showPickingImage || offscreen;
 
         objects.forEach((object) => {
